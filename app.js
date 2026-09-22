@@ -23,7 +23,11 @@ const DEFAULT_STATUSES = [
 
 const NEW_CATEGORY_COLORS = ['#e36414', '#0f9d9a', '#6a4c93', '#c9184a', '#2b9348', '#1d4e89', '#9c6644'];
 
-const PLATFORMS = ['YouTube', 'yes', 'Apple TV בסלון'];
+const DEFAULT_PLATFORMS = ['FlixHQ', 'Netflix', 'Apple TV (מחשב)', 'YouTube'];
+// Which page a category feeds: "today" (what to watch now), "next" (deciding what's next) or none.
+const DEFAULT_PAGES = { watching: 'today', upnext: 'next', maybe: 'next', retry: 'next', rewatch: 'next' };
+const PAGES = ['today', 'next', 'fav', 'all'];
+const UNKNOWN_PF = '__none';
 
 /* ---------- Strings ---------- */
 const STRINGS = {
@@ -70,6 +74,23 @@ const STRINGS = {
     imageTooBig: 'לא הצלחתי לקרוא את התמונה. נסו תמונה אחרת.',
     about: 'על האתר', aboutText: 'מעקב צפייה אישי. אין חשבון ואין שרת – הכול נשמר אצלכם במכשיר.',
     favOn: 'נוספה למועדפים', favOff: 'הוסרה מהמועדפים', movedTo: 'הועברה ל"{0}"',
+    navToday: 'היום', navNext: 'הבא בתור', navFav: 'מועדפים', navAll: 'הכול',
+    todayTitle: 'מה לראות היום', nextTitle: 'מה יהיה הבא?', favTitle: 'מועדפים', allTitle: 'כל הסדרות',
+    todayHint: 'הסדרות שאתה באמצע שלהן. ▶ פותח את הקישור לצפייה.',
+    nextHint: 'המועמדים מהקטגוריות {0}.',
+    todayEmptyTitle: 'אין כרגע סדרה בצפייה', todayEmpty: 'אפשר לבחור מה להתחיל בדף "הבא בתור".', goNext: 'לדף הבא בתור',
+    nextEmptyTitle: 'אין מועמדים', nextEmpty: 'אין סדרות בקטגוריות של "הבא בתור".',
+    favEmptyTitle: 'עוד אין מועדפים', favEmpty: 'לוחצים על הכוכב בכרטיס של סדרה כדי להוסיף אותה לכאן.',
+    pfEmpty: 'אין סדרות כאן בפלטפורמה שנבחרה.',
+    anyPlatform: 'הכול', unknownPlatform: 'לא ידוע',
+    pickForMe: 'תבחר לי סדרה', pickAgain: 'הצעה אחרת', startWatching: 'מתחיל לראות', details: 'פרטים',
+    started: 'עברה ל"{0}"', undo: 'ביטול', yourPick: 'ההצעה:',
+    imdb: 'IMDb', imdbField: 'קישור ל-IMDb', imdbHint: 'מתמלא לבד כשבוחרים התאמה מ-TVmaze. אפשר גם להדביק קישור מ-IMDb.',
+    badImdb: 'צריך קישור לדף של סדרה ב-IMDb (מכיל /title/tt…).', imdbSearch: 'חיפוש ב-IMDb',
+    platforms: 'איפה רואים', platformsHint: 'האפשרויות שמופיעות בכל סדרה. "לא ידוע" תמיד קיים.',
+    addPlatform: 'הוספת פלטפורמה', platformName: 'שם הפלטפורמה',
+    deletePlatformConfirm: 'למחוק את "{0}"? {1} סדרות יעברו ל"לא ידוע".',
+    categoryPage: 'מופיעה בדף', pageToday: 'היום', pageNext: 'הבא בתור', pageNone: 'רק ב"הכול"',
   },
   en: {
     appName: 'My Series', search: 'Search a series, platform or note…', sort: 'Sort',
@@ -114,6 +135,23 @@ const STRINGS = {
     imageTooBig: 'Couldn’t read that image. Try another one.',
     about: 'About', aboutText: 'A personal watch tracker. No account and no server – everything stays on your device.',
     favOn: 'Added to favorites', favOff: 'Removed from favorites', movedTo: 'Moved to “{0}”',
+    navToday: 'Today', navNext: 'Up next', navFav: 'Favorites', navAll: 'All',
+    todayTitle: 'What to watch today', nextTitle: 'What’s next?', favTitle: 'Favorites', allTitle: 'All series',
+    todayHint: 'Series you’re in the middle of. ▶ opens the watch link.',
+    nextHint: 'Candidates from {0}.',
+    todayEmptyTitle: 'Nothing in progress', todayEmpty: 'Pick what to start on the “Up next” page.', goNext: 'Go to Up next',
+    nextEmptyTitle: 'No candidates', nextEmpty: 'No series in the “Up next” categories.',
+    favEmptyTitle: 'No favorites yet', favEmpty: 'Tap the star on a series card to add it here.',
+    pfEmpty: 'No series here on the selected platform.',
+    anyPlatform: 'All', unknownPlatform: 'Unknown',
+    pickForMe: 'Pick one for me', pickAgain: 'Another one', startWatching: 'Start watching', details: 'Details',
+    started: 'Moved to “{0}”', undo: 'Undo', yourPick: 'How about:',
+    imdb: 'IMDb', imdbField: 'IMDb link', imdbHint: 'Filled in automatically when you pick a TVmaze match. You can also paste an IMDb link.',
+    badImdb: 'Needs an IMDb series link (contains /title/tt…).', imdbSearch: 'Search IMDb',
+    platforms: 'Where I watch', platformsHint: 'The options shown on every series. “Unknown” is always there.',
+    addPlatform: 'Add platform', platformName: 'Platform name',
+    deletePlatformConfirm: 'Delete “{0}”? {1} series will move to “Unknown”.',
+    categoryPage: 'Shows on page', pageToday: 'Today', pageNext: 'Up next', pageNone: 'Only in “All”',
   },
 };
 
@@ -135,6 +173,9 @@ const ICONS = {
   share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
+  dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/><circle cx="15" cy="9" r="1.2"/><circle cx="9" cy="15" r="1.2"/>',
+  library: '<rect x="4" y="4" width="4" height="16" rx="1"/><rect x="10" y="4" width="4" height="16" rx="1"/><path d="M16.5 5.2l3.3-.8 3 15.4-3.3.8z"/>',
   tv: '<rect x="3" y="7" width="18" height="12" rx="2.5"/><path d="M8.5 3.5L12 7l3.5-3.5"/>',
 };
 const icon = (name) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
@@ -205,6 +246,13 @@ function safeImg(url) {
   if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(url)) return url;
   return '';
 }
+// Accepts an IMDb id or any IMDb title link; returns "tt1234567" or "".
+function parseImdb(v) {
+  const m = String(v || '').match(/\b(tt\d{5,10})\b/);
+  return m ? m[1] : '';
+}
+const imdbUrl = (id) => `https://www.imdb.com/title/${id}/`;
+const imdbSearchUrl = (q) => `https://www.imdb.com/find/?q=${encodeURIComponent(q)}&s=tt&ttype=tv`;
 const isWatchUrl = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u.trim());
 
 function el(html) {
@@ -215,6 +263,13 @@ function el(html) {
 function debounce(fn, ms) {
   let t;
   return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+function matchPlatform(name, list) {
+  const first = (v) => String(v || '').toLowerCase().split(/[\s+(–-]/)[0];
+  const f = first(name);
+  if (!f) return '';
+  return list.find((p) => first(p) === f) || '';
 }
 
 function makeShow(p = {}) {
@@ -232,6 +287,7 @@ function makeShow(p = {}) {
     needsCheck: !!p.needsCheck,
     image: p.image || '',
     watchUrl: p.watchUrl || '',
+    imdb: p.imdb || '',
     tvmaze: p.tvmaze || null,
     createdAt: p.createdAt || now,
     updatedAt: p.updatedAt || now,
@@ -244,9 +300,10 @@ let state;
 function defaultState() {
   return {
     version: 1,
-    lang: 'he', theme: 'system', view: 'grid', sort: 'updated', tab: 'all',
+    lang: 'he', theme: 'system', view: 'grid', sort: 'updated', tab: 'all', page: 'today', pf: '',
     lastBackup: null,
-    statuses: DEFAULT_STATUSES.map((s) => ({ ...s })),
+    platforms: DEFAULT_PLATFORMS.slice(),
+    statuses: DEFAULT_STATUSES.map((s) => ({ ...s, page: DEFAULT_PAGES[s.id] || '' })),
     shows: seedShows(),
   };
 }
@@ -262,7 +319,21 @@ function normalizeState(raw) {
       he: typeof s.he === 'string' ? s.he : '',
       en: typeof s.en === 'string' ? s.en : '',
       color: isColor(s.color) ? s.color : '#7d8196',
+      page: ['today', 'next', ''].includes(s.page) ? s.page : (DEFAULT_PAGES[s.id] || ''),
     }));
+  // Platforms: older saves had free text; map it onto the fixed list where it clearly matches.
+  const hadPlatforms = Array.isArray(raw.platforms);
+  const platforms = hadPlatforms
+    ? [...new Set(raw.platforms.filter((p) => typeof p === 'string').map((p) => p.trim().slice(0, 40)).filter(Boolean))]
+    : DEFAULT_PLATFORMS.slice();
+  const canonPlatform = (v) => {
+    const t = typeof v === 'string' ? v.trim() : '';
+    if (!t) return '';
+    const exact = platforms.find((p) => p.toLowerCase() === t.toLowerCase());
+    if (exact) return exact;
+    if (!hadPlatforms) return matchPlatform(t, platforms) || t;
+    return t;
+  };
   if (!statuses.length) return null;
   const showIds = new Set();
   const shows = raw.shows
@@ -274,13 +345,14 @@ function normalizeState(raw) {
         altTitle: typeof s.altTitle === 'string' ? s.altTitle : '',
         status: seen.has(s.status) ? s.status : statuses[0].id,
         favorite: s.favorite === true,
-        platform: typeof s.platform === 'string' ? s.platform : '',
+        platform: canonPlatform(s.platform),
         season: clampInt(s.season, 1, 99),
         rating: clampInt(s.rating, 1, 5) || 0,
         note: typeof s.note === 'string' ? s.note : '',
         needsCheck: s.needsCheck === true,
         image: safeImg(s.image),
         watchUrl: isWatchUrl(s.watchUrl) ? s.watchUrl.trim() : '',
+        imdb: parseImdb(s.imdb),
         tvmaze: s.tvmaze && Number.isFinite(s.tvmaze.id) ? {
           id: s.tvmaze.id,
           url: typeof s.tvmaze.url === 'string' ? s.tvmaze.url : '',
@@ -300,8 +372,10 @@ function normalizeState(raw) {
     view: raw.view === 'list' ? 'list' : 'grid',
     sort: ['updated', 'added', 'title', 'rating'].includes(raw.sort) ? raw.sort : 'updated',
     tab: typeof raw.tab === 'string' ? raw.tab : 'all',
+    page: PAGES.includes(raw.page) ? raw.page : 'today',
+    pf: typeof raw.pf === 'string' ? raw.pf : '',
     lastBackup: Number.isFinite(raw.lastBackup) ? raw.lastBackup : null,
-    statuses, shows,
+    platforms, statuses, shows,
   };
 }
 
@@ -309,7 +383,7 @@ function load() {
   let raw = null;
   try { raw = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { raw = null; }
   state = normalizeState(raw) || defaultState();
-  if (!raw) save();
+  save(); // also persists any migration done by normalizeState
 }
 
 function save() {
@@ -352,9 +426,18 @@ function countLabel(n) {
 
 /* ---------- Toast ---------- */
 let toastTimer;
-function toast(msg, ms = 2600) {
+function toast(msg, ms = 2600, action) {
   const t = $('#toast');
   t.textContent = msg;
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'toast-action';
+    b.textContent = action.label;
+    b.addEventListener('click', () => { t.hidden = true; action.fn(); });
+    t.appendChild(b);
+    ms = Math.max(ms, 5000);
+  }
   t.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.hidden = true; }, ms);
@@ -507,7 +590,7 @@ function posterHTML(show, { flag = false } = {}) {
 }
 function metaParts(show) {
   const parts = [];
-  if (show.platform) parts.push(esc(show.platform));
+  parts.push(show.platform ? esc(show.platform) : `<span class="muted">${esc(T('unknownPlatform'))}</span>`);
   if (show.season) parts.push(esc(T('seasonShort', show.season)));
   if (show.rating) parts.push(`<span style="color:var(--star)">★</span>${show.rating}`);
   return parts.join(' · ');
@@ -527,8 +610,8 @@ function cardHTML(show) {
       ${play ? `<div class="poster-overlay">${play}</div>` : ''}
       <button type="button" class="card-open" data-open="${esc(show.id)}">
         ${posterHTML(show, { flag: true })}
-        <span class="card-title" dir="auto">${esc(primaryTitle(show))}</span>
-        ${secondaryTitle(show) ? `<span class="card-sub" dir="auto">${esc(secondaryTitle(show))}</span>` : ''}
+        <span class="card-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
+        ${secondaryTitle(show) ? `<span class="card-sub"><bdi>${esc(secondaryTitle(show))}</bdi></span>` : ''}
         <span class="card-meta">${metaParts(show)}</span>
       </button>
       ${favBtn(show)}
@@ -541,8 +624,8 @@ function rowHTML(show) {
       <button type="button" class="row-open" data-open="${esc(show.id)}">
         ${posterHTML(show)}
         <span class="row-main">
-          <span class="row-title" dir="auto">${esc(primaryTitle(show))}</span>
-          ${sec ? `<span class="card-meta" dir="auto">${esc(sec)}</span>` : ''}
+          <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
+          ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
           <span class="card-meta">${show.needsCheck ? `<span class="pill-flag">${esc(T('flag'))}</span>` : ''}${metaParts(show)}</span>
         </span>
       </button>
@@ -551,35 +634,226 @@ function rowHTML(show) {
     </div>`;
 }
 
+/* ---------- Pages ---------- */
+let nextPick = null; // id of the current "pick for me" suggestion
+
+const statusesForPage = (page) => state.statuses.filter((st) => st.page === page);
+function pfMatches(show) {
+  if (!state.pf) return true;
+  if (state.pf === UNKNOWN_PF) return !show.platform;
+  return show.platform === state.pf;
+}
+function linkBtn(href, label, cls = 'btn small') {
+  return `<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+}
+function imdbLink(show, cls) {
+  if (show.imdb) return linkBtn(imdbUrl(show.imdb), esc(T('imdb')), cls);
+  return '';
+}
+
+// Platform filter chips for the Today / Up next pages (only platforms that have series).
+function pfChipsHTML(pool) {
+  const opts = [...state.platforms, ...new Set(pool.map((s) => s.platform).filter((p) => p && !state.platforms.includes(p)))];
+  const chips = [{ v: '', label: T('anyPlatform'), n: pool.length }]
+    .concat(opts.map((p) => ({ v: p, label: p, n: pool.filter((s) => s.platform === p).length })))
+    .concat([{ v: UNKNOWN_PF, label: T('unknownPlatform'), n: pool.filter((s) => !s.platform).length }])
+    .filter((c) => c.n > 0 || c.v === state.pf);
+  if (chips.length <= 2 && !state.pf) return '';
+  return `<nav class="chips page-chips" aria-label="${esc(T('platform'))}">${chips.map((c) => `
+    <button type="button" class="chip" data-pf="${esc(c.v)}" aria-pressed="${c.v === state.pf}">
+      <span>${esc(c.label)}</span><span class="count">${c.n}</span>
+    </button>`).join('')}</nav>`;
+}
+function pageHead(title, hint) {
+  return `<header class="page-head"><h2 class="page-title">${esc(title)}</h2>${hint ? `<p class="page-hint">${esc(hint)}</p>` : ''}</header>`;
+}
+function emptyHTML(title, body, extra = '') {
+  return `<div class="empty"><strong>${esc(title)}</strong>${esc(body)}${extra}</div>`;
+}
+
+function todayRowHTML(show) {
+  const sec = secondaryTitle(show);
+  const watch = isWatchUrl(show.watchUrl)
+    ? `<a class="btn primary small watch-now" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(T('watch'))}</a>`
+    : '';
+  return `
+    <div class="trow">
+      <button type="button" class="row-open" data-open="${esc(show.id)}">
+        ${posterHTML(show)}
+        <span class="row-main">
+          <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
+          ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
+          <span class="card-meta">${metaParts(show)}</span>
+        </span>
+      </button>
+      ${watch}
+    </div>`;
+}
+
+function candidateRowHTML(show) {
+  const sec = secondaryTitle(show);
+  return `
+    <div class="trow">
+      <button type="button" class="row-open" data-open="${esc(show.id)}">
+        ${posterHTML(show)}
+        <span class="row-main">
+          <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
+          ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
+          <span class="card-meta">${metaParts(show)}</span>
+        </span>
+      </button>
+      <div class="trow-actions">
+        <button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
+        ${imdbLink(show, 'btn small')}
+      </div>
+    </div>`;
+}
+
+function pickCardHTML(show) {
+  const sec = secondaryTitle(show);
+  const st = statusById(show.status);
+  return `
+    <section class="pick" aria-live="polite">
+      <div class="pick-poster">${posterHTML(show)}</div>
+      <div class="pick-main">
+        <span class="page-hint">${esc(T('yourPick'))}</span>
+        <strong class="pick-title"><bdi>${esc(primaryTitle(show))}</bdi></strong>
+        ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
+        <span class="card-meta"><span class="dot" style="--c:${st ? st.color : '#7d8196'}"></span>${esc(statusLabel(st))} · ${metaParts(show)}</span>
+        <div class="btn-row">
+          <button type="button" class="btn primary small" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
+          <button type="button" class="btn small" data-pick-again>${icon('dice')}${esc(T('pickAgain'))}</button>
+          ${imdbLink(show, 'btn small')}
+          <button type="button" class="btn small" data-open="${esc(show.id)}">${esc(T('details'))}</button>
+        </div>
+      </div>
+    </section>`;
+}
+
+function renderToday(list) {
+  const cats = statusesForPage('today');
+  const pool = state.shows.filter((s) => cats.some((c) => c.id === s.status));
+  if (!pool.length) {
+    list.innerHTML = pageHead(T('todayTitle')) + emptyHTML(T('todayEmptyTitle'), T('todayEmpty'),
+      `<div><button type="button" class="btn primary" data-goto="next" style="margin-top:14px">${esc(T('goNext'))}</button></div>`);
+    return;
+  }
+  const items = pool.filter(pfMatches).sort((a, b) => b.updatedAt - a.updatedAt);
+  list.innerHTML = pageHead(T('todayTitle'), T('todayHint')) + pfChipsHTML(pool) +
+    (items.length ? `<div class="rows">${items.map(todayRowHTML).join('')}</div>` : emptyHTML(T('emptyFilterTitle'), T('pfEmpty')));
+}
+
+function renderNext(list) {
+  const cats = statusesForPage('next');
+  const pool = state.shows.filter((s) => cats.some((c) => c.id === s.status));
+  const hint = T('nextHint', cats.map((c) => `"${statusLabel(c)}"`).join(', '));
+  if (!pool.length) {
+    list.innerHTML = pageHead(T('nextTitle'), cats.length ? hint : '') + emptyHTML(T('nextEmptyTitle'), T('nextEmpty'));
+    return;
+  }
+  const items = pool.filter(pfMatches);
+  const pick = nextPick && items.find((s) => s.id === nextPick);
+  if (!pick) nextPick = null;
+  const groups = cats.map((st) => {
+    const g = items.filter((s) => s.status === st.id).sort((a, b) => b.updatedAt - a.updatedAt);
+    if (!g.length) return '';
+    return `
+      <section class="group">
+        <h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${g.length}</span></h3>
+        <div class="rows">${g.map(candidateRowHTML).join('')}</div>
+      </section>`;
+  }).join('');
+  list.innerHTML = pageHead(T('nextTitle'), hint) + pfChipsHTML(pool) +
+    (items.length ? `
+      ${pick ? pickCardHTML(pick) : `<button type="button" class="btn pick-btn" data-pick-again>${icon('dice')}${esc(T('pickForMe'))}</button>`}
+      ${groups}` : emptyHTML(T('emptyFilterTitle'), T('pfEmpty')));
+}
+
+function pickRandom() {
+  const cats = statusesForPage('next');
+  const items = state.shows.filter((s) => cats.some((c) => c.id === s.status) && pfMatches(s));
+  if (!items.length) return;
+  const others = items.length > 1 ? items.filter((s) => s.id !== nextPick) : items;
+  nextPick = others[Math.floor(Math.random() * others.length)].id;
+  renderList();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startWatching(id) {
+  const show = state.shows.find((s) => s.id === id);
+  const target = statusesForPage('today')[0] || statusById('watching') || state.statuses[0];
+  if (!show || !target) return;
+  const prev = { status: show.status, updatedAt: show.updatedAt };
+  show.status = target.id;
+  show.updatedAt = Date.now();
+  if (nextPick === id) nextPick = null;
+  save();
+  renderList();
+  toast(T('started', statusLabel(target)), 5000, {
+    label: T('undo'),
+    fn: () => { Object.assign(show, prev); save(); renderList(); },
+  });
+}
+
+function renderNav() {
+  const tabs = [
+    { page: 'today', label: T('navToday'), ic: 'sun' },
+    { page: 'next', label: T('navNext'), ic: 'dice' },
+    { page: 'fav', label: T('navFav'), ic: 'star' },
+    { page: 'all', label: T('navAll'), ic: 'library' },
+  ];
+  $('#bottomNav').innerHTML = tabs.map((t) => `
+    <button type="button" data-page="${t.page}" aria-current="${t.page === state.page ? 'page' : 'false'}">
+      ${icon(t.ic)}<span>${esc(t.label)}</span>
+    </button>`).join('');
+  const lib = state.page === 'all';
+  $('#libraryTools').hidden = !lib;
+  $('#viewToggle').hidden = !(lib || state.page === 'fav');
+}
+
 function renderList() {
-  renderChips();
+  renderNav();
   const list = $('#list');
+  if (state.page === 'today') { renderToday(list); return; }
+  if (state.page === 'next') { renderNext(list); return; }
+  if (state.page === 'fav') { renderFav(list); return; }
+  renderAll(list);
+}
+
+function itemsHTML(items) {
+  return state.view === 'grid'
+    ? `<div class="grid">${items.map(cardHTML).join('')}</div>`
+    : `<div class="rows">${items.map(rowHTML).join('')}</div>`;
+}
+function groupedHTML(visible) {
+  return state.statuses.map((st) => {
+    const items = visible.filter((s) => s.status === st.id);
+    if (!items.length) return '';
+    return `
+      <section class="group">
+        <h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${items.length}</span></h3>
+        ${itemsHTML(items)}
+      </section>`;
+  }).join('');
+}
+
+function renderFav(list) {
+  const favs = sortShows(state.shows.filter((s) => s.favorite));
+  list.innerHTML = pageHead(T('favTitle')) + (favs.length ? groupedHTML(favs) : emptyHTML(T('favEmptyTitle'), T('favEmpty')));
+}
+
+function renderAll(list) {
+  renderChips();
   const visible = sortShows(state.shows.filter((s) => tabMatches(s) && searchMatches(s)));
   if (!visible.length) {
     let title = T('emptyFilterTitle'), body = T('emptyFilter');
     if (query) body = T('emptySearch', query);
     else if (!state.shows.length) { title = T('emptyAllTitle'); body = T('emptyAll'); }
-    list.innerHTML = `<div class="empty"><strong>${esc(title)}</strong>${esc(body)}</div>`;
+    list.innerHTML = emptyHTML(title, body);
     return;
   }
-  const renderItems = (items) => state.view === 'grid'
-    ? `<div class="grid">${items.map(cardHTML).join('')}</div>`
-    : `<div class="rows">${items.map(rowHTML).join('')}</div>`;
-
-  if (state.tab.startsWith('s:')) {
-    list.innerHTML = renderItems(visible);
-    return;
-  }
-  // Group by category, in category order.
-  list.innerHTML = state.statuses.map((st) => {
-    const items = visible.filter((s) => s.status === st.id);
-    if (!items.length) return '';
-    return `
-      <section class="group">
-        <h2 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${items.length}</span></h2>
-        ${renderItems(items)}
-      </section>`;
-  }).join('');
+  // A single category is a flat list; everything else is grouped by category.
+  list.innerHTML = state.tab.startsWith('s:') ? itemsHTML(visible) : groupedHTML(visible);
 }
 
 function toggleFavorite(id) {
@@ -614,7 +888,18 @@ async function tvmazeSearch(q, signal) {
       network: (s.network && s.network.name) || (s.webChannel && s.webChannel.name) || '',
       image: safeImg(s.image && (s.image.medium || s.image.original)),
       url: typeof s.url === 'string' ? s.url : '',
+      imdb: parseImdb(s.externals && s.externals.imdb),
     }));
+}
+
+// Looks up the IMDb id for a show already linked to TVmaze.
+async function tvmazeImdb(tvmazeId) {
+  try {
+    const res = await fetch(`https://api.tvmaze.com/shows/${encodeURIComponent(tvmazeId)}`);
+    if (!res.ok) return '';
+    const data = await res.json();
+    return parseImdb(data && data.externals && data.externals.imdb);
+  } catch (e) { return ''; }
 }
 
 function resultHTML(r, i) {
@@ -639,7 +924,8 @@ function applyPick(show, r) {
     // Hebrew title stays; the English name from TVmaze becomes the other name.
     if (!show.altTitle || hasHebrew(show.altTitle)) show.altTitle = r.name;
   } else show.title = r.name;
-  if (!show.platform && r.network) show.platform = r.network;
+  if (r.imdb) show.imdb = r.imdb;
+  if (!show.platform && r.network) show.platform = matchPlatform(r.network, state.platforms);
 }
 
 function searchQueryFor(show) {
@@ -826,21 +1112,23 @@ function openEditor(id) {
       <input id="fAlt" class="input" dir="auto" autocomplete="off" value="${esc(show.altTitle)}">
       <span class="hint">${esc(T('altHint'))}</span>
     </div>
-    <div class="two">
-      <div class="field">
-        <label for="fPlatform">${esc(T('platform'))}</label>
-        <input id="fPlatform" class="input" dir="auto" list="platformList" autocomplete="off" value="${esc(show.platform)}">
-        <datalist id="platformList"></datalist>
-      </div>
-      <div class="field">
-        <label for="fSeason">${esc(T('season'))}</label>
-        <input id="fSeason" class="input" type="number" inputmode="numeric" min="1" max="99" value="${show.season ?? ''}">
-      </div>
+    <div class="field">
+      <span class="label" id="lblPlatform">${esc(T('platform'))}</span>
+      <div class="status-grid" role="radiogroup" aria-labelledby="lblPlatform" data-platforms></div>
+    </div>
+    <div class="field">
+      <label for="fSeason">${esc(T('season'))}</label>
+      <input id="fSeason" class="input" type="number" inputmode="numeric" min="1" max="99" value="${show.season ?? ''}" style="max-width:10rem">
     </div>
     <div class="field">
       <label for="fWatch">${esc(T('watchLink'))}</label>
       <input id="fWatch" class="input ltr" type="url" inputmode="url" placeholder="https://…" autocomplete="off" value="${esc(show.watchUrl)}">
       <span class="hint" data-watch-hint>${esc(T('watchLinkHint'))}</span>
+    </div>
+    <div class="field">
+      <label for="fImdb">${esc(T('imdbField'))}</label>
+      <input id="fImdb" class="input ltr" type="url" inputmode="url" placeholder="https://www.imdb.com/title/tt…" autocomplete="off" value="${show.imdb ? esc(imdbUrl(show.imdb)) : ''}">
+      <span class="hint" data-imdb-hint>${esc(T('imdbHint'))}</span>
     </div>
     <div class="field">
       <span class="label" id="lblRating">${esc(T('rating'))}</span>
@@ -859,8 +1147,6 @@ function openEditor(id) {
     <button type="button" class="btn danger" data-delete>${icon('trash')}${esc(T('deleteSeries'))}</button>`}
   `;
 
-  const platforms = [...new Set([...state.shows.map((s) => s.platform).filter(Boolean), ...PLATFORMS])];
-  $('#platformList', body).innerHTML = platforms.map((p) => `<option value="${esc(p)}"></option>`).join('');
 
   // Saved shows update as you go; a new show is only a draft until "Add".
   function touch({ list = true } = {}) {
@@ -890,15 +1176,32 @@ function openEditor(id) {
       linked.innerHTML = `${esc(T('matched'))}${meta ? ` <span class="ltr">(${esc(meta)})</span>` : ''} · <button type="button" class="btn small" data-unlink style="min-height:30px">${esc(T('unlink'))}</button>`;
     } else linked.innerHTML = '';
   }
+  function renderPlatforms() {
+    const opts = state.platforms.slice();
+    if (show.platform && !opts.includes(show.platform)) opts.push(show.platform);
+    $('[data-platforms]', body).innerHTML = opts.concat(['']).map((p) => `
+      <button type="button" class="status-opt" role="radio" data-platform="${esc(p)}" aria-checked="${p === show.platform}" style="--c:var(--accent)">
+        ${esc(p || T('unknownPlatform'))}
+      </button>`).join('');
+  }
+  // Watch + IMDb buttons at the top of the sheet.
   function renderWatchTop() {
     const box = $('[data-watch-top]', body);
-    if (!isWatchUrl(show.watchUrl)) { box.innerHTML = ''; return; }
-    box.innerHTML = `<a class="btn primary watch-big" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(show.platform ? T('watchOn', show.platform) : T('watch'))}</a>`;
+    const parts = [];
+    if (isWatchUrl(show.watchUrl)) {
+      parts.push(`<a class="btn primary watch-big" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(show.platform ? T('watchOn', show.platform) : T('watch'))}</a>`);
+    }
+    const q = searchQueryFor(show).trim();
+    if (show.imdb) parts.push(linkBtn(imdbUrl(show.imdb), esc(T('imdb')), 'btn imdb-btn'));
+    else if (q) parts.push(linkBtn(imdbSearchUrl(q), `${icon('search')}${esc(T('imdbSearch'))}`, 'btn'));
+    box.className = parts.length ? 'btn-row top-actions' : '';
+    box.innerHTML = parts.join('');
   }
   function syncFields() {
     $('#fTitle', body).value = show.title;
     $('#fAlt', body).value = show.altTitle;
-    $('#fPlatform', body).value = show.platform;
+    $('#fImdb', body).value = show.imdb ? imdbUrl(show.imdb) : '';
+    renderPlatforms();
     renderWatchTop();
   }
   function showDuplicate() {
@@ -913,7 +1216,18 @@ function openEditor(id) {
     });
     return dup;
   }
-  renderStatuses(); renderStars(); renderImage(); renderWatchTop();
+  renderStatuses(); renderStars(); renderImage(); renderPlatforms(); renderWatchTop();
+
+  // Shows linked to TVmaze before IMDb support: fetch the IMDb id quietly.
+  if (show.tvmaze && !show.imdb) {
+    tvmazeImdb(show.tvmaze.id).then((id) => {
+      if (!id || show.imdb || !layer.isConnected) return;
+      show.imdb = id;
+      $('#fImdb', body).value = imdbUrl(id);
+      renderWatchTop();
+      if (!isNew) save();
+    });
+  }
 
   // Title + live TVmaze suggestions while adding.
   let suggestCtrl, suggestions = [];
@@ -947,6 +1261,7 @@ function openEditor(id) {
       if (show.title.trim()) touch({ list: false });
     }
     showDuplicate();
+    renderWatchTop();
     suggest();
   });
   $('#fTitle', body).addEventListener('blur', () => {
@@ -957,8 +1272,26 @@ function openEditor(id) {
       touch({ list: false });
     }
   });
-  $('#fAlt', body).addEventListener('input', (e) => { show.altTitle = e.target.value; touch({ list: false }); });
-  $('#fPlatform', body).addEventListener('input', (e) => { show.platform = e.target.value; renderWatchTop(); touch({ list: false }); });
+  $('#fAlt', body).addEventListener('input', (e) => { show.altTitle = e.target.value; renderWatchTop(); touch({ list: false }); });
+  $('[data-platforms]', body).addEventListener('click', (e) => {
+    const b = e.target.closest('[data-platform]');
+    if (!b || b.dataset.platform === show.platform) return;
+    show.platform = b.dataset.platform;
+    renderPlatforms(); renderWatchTop();
+    touch();
+  });
+  $('#fImdb', body).addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    const id = parseImdb(v);
+    const hint = $('[data-imdb-hint]', body);
+    const valid = !v || !!id;
+    hint.textContent = valid ? T('imdbHint') : T('badImdb');
+    hint.className = valid ? 'hint' : 'error-text';
+    if (!valid) return;
+    show.imdb = id;
+    renderWatchTop();
+    touch({ list: false });
+  });
   $('#fWatch', body).addEventListener('input', (e) => {
     const v = e.target.value.trim();
     const hint = $('[data-watch-hint]', body);
@@ -1104,6 +1437,12 @@ function openSettings() {
         </div>
       </section>
       <section class="section">
+        <h3>${esc(T('platforms'))}</h3>
+        <span class="hint">${esc(T('platformsHint'))}</span>
+        <div class="section" data-pfs></div>
+        <button type="button" class="btn" data-add-pf>${icon('plus')}${esc(T('addPlatform'))}</button>
+      </section>
+      <section class="section">
         <h3>${esc(T('categories'))}</h3>
         <span class="hint">${esc(T('categoriesHint'))}</span>
         <div class="section" data-cats></div>
@@ -1130,6 +1469,16 @@ function openSettings() {
         <span class="hint">${esc(T('credit'))}</span>
       </section>`;
     renderCats();
+    renderPfs();
+  }
+
+  function renderPfs() {
+    $('[data-pfs]', body).innerHTML = state.platforms.map((p, i) => `
+      <div class="pf-row" data-pf-row="${i}">
+        <input class="input" dir="auto" data-pf-name value="${esc(p)}" aria-label="${esc(T('platformName'))}" maxlength="40">
+        <span class="hint">${state.shows.filter((s) => s.platform === p).length}</span>
+        <button type="button" class="icon-btn" data-del-pf aria-label="${esc(T('delete'))}">${icon('trash')}</button>
+      </div>`).join('');
   }
 
   function renderCats() {
@@ -1147,6 +1496,12 @@ function openSettings() {
             <button type="button" class="icon-btn" data-move="-1" aria-label="${esc(T('moveUp'))}" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button>
             <button type="button" class="icon-btn" data-move="1" aria-label="${esc(T('moveDown'))}" ${i === state.statuses.length - 1 ? 'disabled' : ''}>${icon('down')}</button>
           </div>
+          <label class="cat-page">
+            <span class="hint">${esc(T('categoryPage'))}</span>
+            <select class="select" data-cat-page>
+              ${[['today', 'pageToday'], ['next', 'pageNext'], ['', 'pageNone']].map(([v, k]) => `<option value="${v}" ${st.page === v ? 'selected' : ''}>${esc(T(k))}</option>`).join('')}
+            </select>
+          </label>
           <div class="cat-foot">
             <span>${esc(countLabel(n))}</span>
             <button type="button" class="btn small danger" data-del-cat>${icon('trash')}${esc(T('deleteCategory'))}</button>
@@ -1186,6 +1541,27 @@ function openSettings() {
       last.focus();
       return;
     }
+    if (e.target.closest('[data-add-pf]')) {
+      let name = T('platformName'), n = 2;
+      while (state.platforms.includes(name)) name = `${T('platformName')} ${n++}`;
+      state.platforms.push(name);
+      save(); renderPfs();
+      const inputs = body.querySelectorAll('[data-pf-name]');
+      const last = inputs[inputs.length - 1];
+      last.focus(); last.select();
+      return;
+    }
+    const pfRow = e.target.closest('[data-pf-row]');
+    if (pfRow && e.target.closest('[data-del-pf]')) {
+      const name = state.platforms[+pfRow.dataset.pfRow];
+      const using = state.shows.filter((s) => s.platform === name);
+      if (using.length && !(await confirmBox(T('deletePlatformConfirm', name, using.length), T('delete'), { danger: true }))) return;
+      using.forEach((s) => { s.platform = ''; });
+      state.platforms = state.platforms.filter((p) => p !== name);
+      if (state.pf === name) state.pf = '';
+      save(); renderPfs(); renderList();
+      return;
+    }
     if (e.target.closest('[data-fill]')) {
       const queue = state.shows.filter((s) => !s.image);
       if (queue.length) openPicker({ queue });
@@ -1194,6 +1570,26 @@ function openSettings() {
     if (e.target.closest('[data-export]')) { exportBackup(); render(); return; }
     if (e.target.closest('[data-share]')) { await shareBackup(); render(); return; }
     if (e.target.closest('[data-import]')) { $('#importInput', body).click(); }
+  });
+
+  body.addEventListener('change', (e) => {
+    const pfRow = e.target.closest('[data-pf-row]');
+    if (pfRow && e.target.matches('[data-pf-name]')) {
+      const i = +pfRow.dataset.pfRow;
+      const oldName = state.platforms[i];
+      const name = e.target.value.trim().slice(0, 40);
+      if (!name || (name !== oldName && state.platforms.includes(name))) { e.target.value = oldName; return; }
+      state.platforms[i] = name;
+      state.shows.forEach((s) => { if (s.platform === oldName) s.platform = name; });
+      if (state.pf === oldName) state.pf = name;
+      save(); renderList();
+      return;
+    }
+    const row = e.target.closest('[data-cat]');
+    if (row && e.target.matches('[data-cat-page]')) {
+      const st = statusById(row.dataset.cat);
+      if (st) { st.page = e.target.value; save(); renderList(); }
+    }
   });
 
   body.addEventListener('input', (e) => {
@@ -1317,9 +1713,24 @@ function init() {
     renderList();
     window.scrollTo({ top: 0 });
   });
+  $('#bottomNav').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-page]');
+    if (!b) return;
+    state.page = b.dataset.page;
+    save();
+    renderList();
+    window.scrollTo({ top: 0 });
+  });
   $('#list').addEventListener('click', (e) => {
     const fav = e.target.closest('[data-fav]');
     if (fav) { toggleFavorite(fav.dataset.fav); return; }
+    const pf = e.target.closest('[data-pf]');
+    if (pf) { state.pf = pf.dataset.pf; nextPick = null; save(); renderList(); return; }
+    const start = e.target.closest('[data-start]');
+    if (start) { startWatching(start.dataset.start); return; }
+    if (e.target.closest('[data-pick-again]')) { pickRandom(); return; }
+    const go = e.target.closest('[data-goto]');
+    if (go) { state.page = go.dataset.goto; save(); renderList(); return; }
     const open = e.target.closest('[data-open]');
     if (open) openEditor(open.dataset.open);
   });

@@ -71,7 +71,7 @@ body {
   color: var(--ink);
   font: 400 15px/1.45 var(--font);
   min-height: 100vh;
-  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
   -webkit-tap-highlight-color: transparent;
 }
 body.locked { overflow: hidden; }
@@ -272,7 +272,7 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .fab {
   position: fixed; z-index: 11;
   inset-inline-end: 16px;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   display: inline-flex; align-items: center; gap: 8px;
   height: 54px; padding: 0 22px 0 18px;
   border: 0; border-radius: 18px;
@@ -446,9 +446,84 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .toast {
   position: fixed; z-index: 90;
   left: 50%; transform: translateX(-50%);
-  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(146px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 12px;
   max-width: calc(100% - 32px);
   padding: 10px 16px; border-radius: 12px;
   background: var(--ink); color: var(--bg);
   font-size: 14px; box-shadow: var(--shadow);
 }
+
+/* ---------- Bottom navigation ---------- */
+.bottom-nav {
+  position: fixed; z-index: 12;
+  left: 0; right: 0; bottom: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.bottom-nav button {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 54px; padding: 4px 0;
+  border: 0; border-radius: 12px; background: none;
+  color: var(--ink-3); font-size: 12px; font-weight: 500;
+}
+.bottom-nav button svg.i { width: 22px; height: 22px; }
+.bottom-nav button[aria-current="page"] { color: var(--accent); font-weight: 700; }
+.bottom-nav button[aria-current="page"] svg.i { stroke-width: 2.4; }
+
+/* ---------- Page heads ---------- */
+.page-head { margin: 2px 0 12px; }
+.page-title { margin: 0; font: 400 22px/1.2 var(--display); }
+.page-hint { margin: 4px 0 0; font-size: 13px; color: var(--ink-3); }
+.page-chips { margin: 0 -16px 14px; }
+.group-head { margin-top: 0; }
+.muted { color: var(--ink-3); }
+a.btn { text-decoration: none; }
+
+/* Today / Up next rows */
+.trow {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 8px; border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--shadow);
+}
+.trow .row-open { min-width: 60%; }
+.trow .poster { width: 56px; flex: none; border-radius: 8px; box-shadow: none; }
+.trow-actions { display: flex; gap: 6px; margin-inline-start: auto; }
+.watch-now svg.i, .trow-actions svg.i, .pick svg.i[viewBox] { width: 16px; height: 16px; }
+.watch-now svg.i, .trow-actions .primary svg.i, .pick .primary svg.i { fill: currentColor; stroke: none; }
+.watch-now { flex: none; }
+
+/* Pick for me */
+.pick-btn { width: 100%; margin-bottom: 18px; min-height: 52px; font-size: 16px; border-style: dashed; }
+.pick {
+  display: flex; gap: 14px; align-items: flex-start;
+  margin-bottom: 20px; padding: 12px;
+  border-radius: 18px; border: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+.pick-poster { width: 96px; flex: none; }
+.pick-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pick-title { font: 400 20px/1.2 var(--display); overflow-wrap: anywhere; }
+.pick .btn-row { margin-top: 6px; }
+.pick .btn { background: var(--surface); }
+.pick .btn.primary { background: var(--accent); }
+
+/* Editor extras */
+.top-actions .btn { flex: 1; min-width: 40%; }
+.imdb-btn { background: #f5c518; border-color: #f5c518; color: #111; font-weight: 700; }
+
+/* Settings extras */
+.pf-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+.cat-page { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; }
+.cat-page .select { min-height: 38px; padding: 6px 10px; flex: 1; }
+
+.toast-action {
+  border: 0; background: none; color: var(--accent);
+  font-weight: 700; padding: 4px 6px; margin-inline-start: auto;
+}
+
+.card-sub { display: block; margin-top: 0; }
+.start-btn { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); font-weight: 600; }
+.start-btn svg.i { fill: currentColor; stroke: none; width: 14px; height: 14px; }

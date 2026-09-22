@@ -1,7 +1,7 @@
 // Offline support: the app shell is served from cache and refreshed in the
 // background; posters are cached after first view. TVmaze searches always go
 // to the network.
-const SHELL_CACHE = 'series-shell-v2';
+const SHELL_CACHE = 'series-shell-v3';
 const IMAGE_CACHE = 'series-images-v1';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 

@@ -23,7 +23,7 @@ const DEFAULT_STATUSES = [
 
 const NEW_CATEGORY_COLORS = ['#e36414', '#0f9d9a', '#6a4c93', '#c9184a', '#2b9348', '#1d4e89', '#9c6644'];
 
-const PLATFORMS = ['Netflix', 'Apple TV+', 'Disney+', 'HBO Max', 'Prime Video', 'Peacock', 'Hulu', 'Paramount+', 'yes', 'HOT', 'סלקום TV', 'פרטנר TV', 'כאן 11', 'קשת 12', 'רשת 13'];
+const PLATFORMS = ['YouTube', 'yes', 'Apple TV בסלון'];
 
 /* ---------- Strings ---------- */
 const STRINGS = {
@@ -35,6 +35,8 @@ const STRINGS = {
     viewGrid: 'תצוגת כרטיסים', viewList: 'תצוגת רשימה',
     title: 'שם הסדרה', altTitle: 'שם נוסף (בשפה השנייה)', altHint: 'למשל השם באנגלית – עוזר לחיפוש תמונה',
     status: 'סטטוס צפייה', favorite: 'במועדפים', platform: 'איפה רואים', season: 'עונה נוכחית',
+    watchLink: 'קישור לצפייה', watchLinkHint: 'הקישור לדף של הסדרה עצמה. לחיצה על "צפייה" תפתח אותו.',
+    watch: 'צפייה', watchOn: 'צפייה ב-{0}', badWatchLink: 'הקישור צריך להתחיל ב-https:// (העתיקו אותו משורת הכתובת).',
     rating: 'הדירוג שלי', note: 'הערה', needsCheck: 'לסמן לבדיקה', needsCheckHint: 'למשל כשלא בטוחים בשם או בקטגוריה',
     image: 'תמונה', findImage: 'חיפוש תמונה ב-TVmaze', pasteLink: 'הדבקת קישור לתמונה', uploadImage: 'העלאה מהטלפון',
     removeImage: 'הסרת התמונה', useLink: 'שימוש בקישור', badLink: 'הקישור צריך להתחיל ב-https://',
@@ -77,6 +79,8 @@ const STRINGS = {
     viewGrid: 'Card view', viewList: 'List view',
     title: 'Series name', altTitle: 'Other name (second language)', altHint: 'E.g. the English name – helps the image search',
     status: 'Watch status', favorite: 'In favorites', platform: 'Where I watch', season: 'Current season',
+    watchLink: 'Watch link', watchLinkHint: 'The link to this series’ own page. “Watch” opens it.',
+    watch: 'Watch', watchOn: 'Watch on {0}', badWatchLink: 'The link must start with https:// (copy it from the address bar).',
     rating: 'My rating', note: 'Note', needsCheck: 'Mark to check', needsCheckHint: 'E.g. when unsure about the name or category',
     image: 'Image', findImage: 'Find image on TVmaze', pasteLink: 'Paste an image link', uploadImage: 'Upload from phone',
     removeImage: 'Remove image', useLink: 'Use link', badLink: 'The link must start with https://',
@@ -130,6 +134,7 @@ const ICONS = {
   download: '<path d="M12 4v12M7 11l5 5 5-5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
   share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z"/>',
   tv: '<rect x="3" y="7" width="18" height="12" rx="2.5"/><path d="M8.5 3.5L12 7l3.5-3.5"/>',
 };
 const icon = (name) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
@@ -200,6 +205,8 @@ function safeImg(url) {
   if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(url)) return url;
   return '';
 }
+const isWatchUrl = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u.trim());
+
 function el(html) {
   const t = document.createElement('template');
   t.innerHTML = html.trim();
@@ -224,6 +231,7 @@ function makeShow(p = {}) {
     note: p.note || '',
     needsCheck: !!p.needsCheck,
     image: p.image || '',
+    watchUrl: p.watchUrl || '',
     tvmaze: p.tvmaze || null,
     createdAt: p.createdAt || now,
     updatedAt: p.updatedAt || now,
@@ -272,6 +280,7 @@ function normalizeState(raw) {
         note: typeof s.note === 'string' ? s.note : '',
         needsCheck: s.needsCheck === true,
         image: safeImg(s.image),
+        watchUrl: isWatchUrl(s.watchUrl) ? s.watchUrl.trim() : '',
         tvmaze: s.tvmaze && Number.isFinite(s.tvmaze.id) ? {
           id: s.tvmaze.id,
           url: typeof s.tvmaze.url === 'string' ? s.tvmaze.url : '',
@@ -506,9 +515,16 @@ function metaParts(show) {
 function favBtn(show) {
   return `<button type="button" class="fav-btn" data-fav="${esc(show.id)}" aria-pressed="${show.favorite}" aria-label="${esc(T('favorite'))}">${icon('star')}</button>`;
 }
+function watchBtn(show, cls) {
+  if (!isWatchUrl(show.watchUrl)) return '';
+  const label = show.platform ? T('watchOn', show.platform) : T('watch');
+  return `<a class="${cls}" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(label)}">${icon('play')}</a>`;
+}
 function cardHTML(show) {
+  const play = watchBtn(show, 'play-btn');
   return `
     <div class="card">
+      ${play ? `<div class="poster-overlay">${play}</div>` : ''}
       <button type="button" class="card-open" data-open="${esc(show.id)}">
         ${posterHTML(show, { flag: true })}
         <span class="card-title" dir="auto">${esc(primaryTitle(show))}</span>
@@ -530,6 +546,7 @@ function rowHTML(show) {
           <span class="card-meta">${show.needsCheck ? `<span class="pill-flag">${esc(T('flag'))}</span>` : ''}${metaParts(show)}</span>
         </span>
       </button>
+      ${watchBtn(show, 'row-play')}
       ${favBtn(show)}
     </div>`;
 }
@@ -770,6 +787,7 @@ function openEditor(id) {
   }
 
   body.innerHTML = `
+    <div data-watch-top></div>
     <div class="field">
       <label for="fTitle">${esc(T('title'))}</label>
       <input id="fTitle" class="input" dir="auto" autocomplete="off" enterkeyhint="done" value="${esc(show.title)}">
@@ -820,6 +838,11 @@ function openEditor(id) {
       </div>
     </div>
     <div class="field">
+      <label for="fWatch">${esc(T('watchLink'))}</label>
+      <input id="fWatch" class="input ltr" type="url" inputmode="url" placeholder="https://…" autocomplete="off" value="${esc(show.watchUrl)}">
+      <span class="hint" data-watch-hint>${esc(T('watchLinkHint'))}</span>
+    </div>
+    <div class="field">
       <span class="label" id="lblRating">${esc(T('rating'))}</span>
       <div class="stars" role="radiogroup" aria-labelledby="lblRating" data-stars></div>
     </div>
@@ -867,10 +890,16 @@ function openEditor(id) {
       linked.innerHTML = `${esc(T('matched'))}${meta ? ` <span class="ltr">(${esc(meta)})</span>` : ''} · <button type="button" class="btn small" data-unlink style="min-height:30px">${esc(T('unlink'))}</button>`;
     } else linked.innerHTML = '';
   }
+  function renderWatchTop() {
+    const box = $('[data-watch-top]', body);
+    if (!isWatchUrl(show.watchUrl)) { box.innerHTML = ''; return; }
+    box.innerHTML = `<a class="btn primary watch-big" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(show.platform ? T('watchOn', show.platform) : T('watch'))}</a>`;
+  }
   function syncFields() {
     $('#fTitle', body).value = show.title;
     $('#fAlt', body).value = show.altTitle;
     $('#fPlatform', body).value = show.platform;
+    renderWatchTop();
   }
   function showDuplicate() {
     const box = $('[data-dup]', body);
@@ -884,7 +913,7 @@ function openEditor(id) {
     });
     return dup;
   }
-  renderStatuses(); renderStars(); renderImage();
+  renderStatuses(); renderStars(); renderImage(); renderWatchTop();
 
   // Title + live TVmaze suggestions while adding.
   let suggestCtrl, suggestions = [];
@@ -929,7 +958,18 @@ function openEditor(id) {
     }
   });
   $('#fAlt', body).addEventListener('input', (e) => { show.altTitle = e.target.value; touch({ list: false }); });
-  $('#fPlatform', body).addEventListener('input', (e) => { show.platform = e.target.value; touch({ list: false }); });
+  $('#fPlatform', body).addEventListener('input', (e) => { show.platform = e.target.value; renderWatchTop(); touch({ list: false }); });
+  $('#fWatch', body).addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    const hint = $('[data-watch-hint]', body);
+    const valid = !v || isWatchUrl(v);
+    hint.textContent = valid ? T('watchLinkHint') : T('badWatchLink');
+    hint.className = valid ? 'hint' : 'error-text';
+    if (!valid) return;
+    show.watchUrl = v;
+    renderWatchTop();
+    touch();
+  });
   $('#fSeason', body).addEventListener('input', (e) => { show.season = clampInt(e.target.value, 1, 99); touch({ list: false }); });
   $('#fNote', body).addEventListener('input', (e) => { show.note = e.target.value; touch({ list: false }); });
 

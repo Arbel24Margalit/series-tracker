@@ -78,7 +78,8 @@ const STRINGS = {
     favOn: 'נוספה למועדפים', favOff: 'הוסרה מהמועדפים', movedTo: 'הועברה ל"{0}"',
     navToday: 'היום', navNext: 'הבא בתור', navFav: 'מועדפים', navAll: 'הכול',
     todayTitle: 'מה לראות היום', nextTitle: 'מה יהיה הבא?', favTitle: 'מועדפים', allTitle: 'כל הסדרות',
-    todayHint: 'מה הבא בתור, מה שבאמצע, ומה בהפסקה. ▶ פותח את הקישור לצפייה.',
+    todayHint: 'מה הבא בתור, מה שבאמצע, ומה בהפסקה. ▶ פותח את הקישור לצפייה. גרירת סדרה שמאלה מעבירה אותה לקטגוריה אחרת.',
+    moveTitle: 'להעביר את "{0}" אל:', current: 'עכשיו', openDetails: 'פתיחת הפרטים',
     upNextTitle: 'הבאה בתור', noNextTitle: 'עוד לא נבחרה הסדרה הבאה', noNext: 'בדף "הבא בתור" מסמנים סדרה כהבאה.',
     chooseNext: 'לבחירת הסדרה הבאה', changeNext: 'החלפה', setNext: 'הבאה בתור', unsetNext: 'הבאה בתור ✓',
     nextSet: '"{0}" נקבעה כהבאה בתור', nextCleared: 'הוסרה מ"הבאה בתור"', resume: 'חזרה לצפייה',
@@ -144,7 +145,8 @@ const STRINGS = {
     favOn: 'Added to favorites', favOff: 'Removed from favorites', movedTo: 'Moved to “{0}”',
     navToday: 'Today', navNext: 'Up next', navFav: 'Favorites', navAll: 'All',
     todayTitle: 'What to watch today', nextTitle: 'What’s next?', favTitle: 'Favorites', allTitle: 'All series',
-    todayHint: 'What’s next, what you’re in the middle of, and what’s on hold. ▶ opens the watch link.',
+    todayHint: 'What’s next, what you’re in the middle of, and what’s on hold. ▶ opens the watch link. Swipe a series left to move it to another category.',
+    moveTitle: 'Move “{0}” to:', current: 'current', openDetails: 'Open details',
     upNextTitle: 'Next up', noNextTitle: 'No next series chosen yet', noNext: 'Mark one as next on the “Up next” page.',
     chooseNext: 'Choose the next series', changeNext: 'Change', setNext: 'Next up', unsetNext: 'Next up ✓',
     nextSet: '“{0}” is next up', nextCleared: 'Removed from “Next up”', resume: 'Resume',
@@ -966,6 +968,111 @@ function toggleFavorite(id) {
   save();
   renderList();
   toast(show.favorite ? T('favOn') : T('favOff'));
+}
+
+/* ---------- Swipe left on a series -> category menu ---------- */
+function moveShow(show, statusId) {
+  const target = statusById(statusId);
+  if (!target || show.status === statusId) return;
+  const prev = { status: show.status, updatedAt: show.updatedAt };
+  const prevNext = state.nextId;
+  show.status = statusId;
+  show.updatedAt = Date.now();
+  if (state.nextId === show.id && statusesForPage('today').some((c) => c.id === statusId)) state.nextId = null;
+  if (nextPick === show.id) nextPick = null;
+  save();
+  renderList();
+  toast(T('movedTo', statusLabel(target)), 5000, {
+    label: T('undo'),
+    fn: () => { Object.assign(show, prev); state.nextId = prevNext; save(); renderList(); },
+  });
+}
+
+function openMoveMenu(id) {
+  const show = state.shows.find((s) => s.id === id);
+  if (!show) return;
+  const layer = sheetShell(T('moveTitle', primaryTitle(show)));
+  const body = $('.sheet-body', layer);
+  body.innerHTML = `
+    <div class="move-list">
+      ${state.statuses.map((st) => `
+        <button type="button" class="move-opt" data-move-to="${esc(st.id)}" aria-current="${st.id === show.status}" style="--c:${st.color}">
+          <span class="dot"></span><span>${esc(statusLabel(st))}</span>
+          ${st.id === show.status ? `<span class="hint">${esc(T('current'))}</span>` : ''}
+        </button>`).join('')}
+    </div>
+    <button type="button" class="btn" data-details>${esc(T('openDetails'))}</button>`;
+  body.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-move-to]');
+    if (b) {
+      closeTop();
+      moveShow(show, b.dataset.moveTo);
+      return;
+    }
+    if (e.target.closest('[data-details]')) {
+      closeTop();
+      setTimeout(() => openEditor(show.id), 60);
+    }
+  });
+  openLayer(layer);
+  wireClose(layer);
+}
+
+// Horizontal drag on a series card/row. Vertical scrolling stays native (touch-action: pan-y).
+function initSwipe() {
+  const list = $('#list');
+  const THRESHOLD = 70;
+  let drag = null;
+  let suppressClick = false;
+
+  const reset = (el) => {
+    el.classList.remove('swiping');
+    el.style.transform = '';
+    el.style.opacity = '';
+  };
+
+  list.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const item = e.target.closest('.card, .row, .trow');
+    const open = item && item.querySelector('[data-open]');
+    if (!open) return;
+    drag = { item, id: open.dataset.open, x: e.clientX, y: e.clientY, dx: 0, mode: null, pointerId: e.pointerId };
+  });
+  list.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    if (!drag.mode) {
+      if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
+      if (dx < -12 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        drag.mode = 'swipe';
+        drag.item.classList.add('swiping');
+        try { drag.item.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      } else return;
+    }
+    drag.dx = Math.min(0, dx);
+    drag.item.style.transform = `translateX(${Math.max(drag.dx, -140)}px)`;
+    drag.item.style.opacity = String(1 - Math.min(0.45, -drag.dx / 300));
+  });
+  const end = (e) => {
+    if (!drag || (e && e.pointerId !== drag.pointerId)) return;
+    const { item, id, mode, dx } = drag;
+    drag = null;
+    if (mode !== 'swipe') return;
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 400);
+    reset(item);
+    if (dx <= -THRESHOLD) openMoveMenu(id);
+  };
+  list.addEventListener('pointerup', end);
+  list.addEventListener('pointercancel', (e) => {
+    if (drag && drag.mode) reset(drag.item);
+    drag = null;
+  });
+  // A swipe must not also count as a tap on the card.
+  list.addEventListener('click', (e) => {
+    if (suppressClick) { e.preventDefault(); e.stopPropagation(); suppressClick = false; }
+  }, true);
 }
 
 /* ---------- TVmaze ---------- */
@@ -1861,6 +1968,7 @@ function init() {
     const open = e.target.closest('[data-open]');
     if (open) openEditor(open.dataset.open);
   });
+  initSwipe();
   // A broken image link falls back to the title tile underneath.
   document.addEventListener('error', (e) => {
     if (e.target.tagName === 'IMG' && e.target.closest('.poster')) e.target.remove();

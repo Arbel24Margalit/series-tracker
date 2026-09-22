@@ -41,7 +41,8 @@ const STRINGS = {
     title: 'שם הסדרה', altTitle: 'שם נוסף (בשפה השנייה)', altHint: 'למשל השם באנגלית – עוזר לחיפוש תמונה',
     status: 'סטטוס צפייה', favorite: 'במועדפים', platform: 'איפה רואים', season: 'עונה נוכחית',
     watchLink: 'קישור לצפייה', watchLinkHint: 'הקישור לדף של הסדרה עצמה. לחיצה על "צפייה" תפתח אותו.',
-    watch: 'צפייה', watchOn: 'צפייה ב-{0}', badWatchLink: 'הקישור צריך להתחיל ב-https:// (העתיקו אותו משורת הכתובת).',
+    watch: 'צפייה', watchOn: 'צפייה ב-{0}', searchOn: 'חיפוש ב-{0}',
+    autoLinkHint: 'אין קישור שמור, אז ▶ יחפש את הסדרה ב-{0}. קישור שתדביק כאן יחליף את החיפוש.', badWatchLink: 'הקישור צריך להתחיל ב-https:// (העתיקו אותו משורת הכתובת).',
     rating: 'הדירוג שלי', note: 'הערה', needsCheck: 'לסמן לבדיקה', needsCheckHint: 'למשל כשלא בטוחים בשם או בקטגוריה',
     image: 'תמונה', findImage: 'חיפוש תמונה ב-TVmaze', pasteLink: 'הדבקת קישור לתמונה', uploadImage: 'העלאה מהטלפון',
     removeImage: 'הסרת התמונה', useLink: 'שימוש בקישור', badLink: 'הקישור צריך להתחיל ב-https://',
@@ -77,7 +78,7 @@ const STRINGS = {
     favOn: 'נוספה למועדפים', favOff: 'הוסרה מהמועדפים', movedTo: 'הועברה ל"{0}"',
     navToday: 'היום', navNext: 'הבא בתור', navFav: 'מועדפים', navAll: 'הכול',
     todayTitle: 'מה לראות היום', nextTitle: 'מה יהיה הבא?', favTitle: 'מועדפים', allTitle: 'כל הסדרות',
-    todayHint: 'מה שבאמצע, מה הבא בתור, ומה בהפסקה. ▶ פותח את הקישור לצפייה.',
+    todayHint: 'מה הבא בתור, מה שבאמצע, ומה בהפסקה. ▶ פותח את הקישור לצפייה.',
     upNextTitle: 'הבאה בתור', noNextTitle: 'עוד לא נבחרה הסדרה הבאה', noNext: 'בדף "הבא בתור" מסמנים סדרה כהבאה.',
     chooseNext: 'לבחירת הסדרה הבאה', changeNext: 'החלפה', setNext: 'הבאה בתור', unsetNext: 'הבאה בתור ✓',
     nextSet: '"{0}" נקבעה כהבאה בתור', nextCleared: 'הוסרה מ"הבאה בתור"', resume: 'חזרה לצפייה',
@@ -106,7 +107,8 @@ const STRINGS = {
     title: 'Series name', altTitle: 'Other name (second language)', altHint: 'E.g. the English name – helps the image search',
     status: 'Watch status', favorite: 'In favorites', platform: 'Where I watch', season: 'Current season',
     watchLink: 'Watch link', watchLinkHint: 'The link to this series’ own page. “Watch” opens it.',
-    watch: 'Watch', watchOn: 'Watch on {0}', badWatchLink: 'The link must start with https:// (copy it from the address bar).',
+    watch: 'Watch', watchOn: 'Watch on {0}', searchOn: 'Search {0}',
+    autoLinkHint: 'No saved link, so ▶ searches {0} for this series. A link you paste here replaces the search.', badWatchLink: 'The link must start with https:// (copy it from the address bar).',
     rating: 'My rating', note: 'Note', needsCheck: 'Mark to check', needsCheckHint: 'E.g. when unsure about the name or category',
     image: 'Image', findImage: 'Find image on TVmaze', pasteLink: 'Paste an image link', uploadImage: 'Upload from phone',
     removeImage: 'Remove image', useLink: 'Use link', badLink: 'The link must start with https://',
@@ -142,7 +144,7 @@ const STRINGS = {
     favOn: 'Added to favorites', favOff: 'Removed from favorites', movedTo: 'Moved to “{0}”',
     navToday: 'Today', navNext: 'Up next', navFav: 'Favorites', navAll: 'All',
     todayTitle: 'What to watch today', nextTitle: 'What’s next?', favTitle: 'Favorites', allTitle: 'All series',
-    todayHint: 'What you’re in the middle of, what’s next, and what’s on hold. ▶ opens the watch link.',
+    todayHint: 'What’s next, what you’re in the middle of, and what’s on hold. ▶ opens the watch link.',
     upNextTitle: 'Next up', noNextTitle: 'No next series chosen yet', noNext: 'Mark one as next on the “Up next” page.',
     chooseNext: 'Choose the next series', changeNext: 'Change', setNext: 'Next up', unsetNext: 'Next up ✓',
     nextSet: '“{0}” is next up', nextCleared: 'Removed from “Next up”', resume: 'Resume',
@@ -619,10 +621,28 @@ function metaParts(show) {
 function favBtn(show) {
   return `<button type="button" class="fav-btn" data-fav="${esc(show.id)}" aria-pressed="${show.favorite}" aria-label="${esc(T('favorite'))}">${icon('star')}</button>`;
 }
+// Search pages of the services that have one; matched by the platform name's first word.
+const PLATFORM_SEARCH = {
+  netflix: (q) => `https://www.netflix.com/search?q=${encodeURIComponent(q)}`,
+  youtube: (q) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`,
+  apple: (q) => `https://tv.apple.com/search?term=${encodeURIComponent(q)}`,
+};
+// The link ▶ opens: a pasted link wins; otherwise a search on the series' platform.
+function watchTarget(show) {
+  if (isWatchUrl(show.watchUrl)) return { url: show.watchUrl.trim(), auto: false };
+  const key = String(show.platform || '').toLowerCase().split(/[\s+(–-]/)[0];
+  const q = searchQueryFor(show).trim();
+  if (PLATFORM_SEARCH[key] && q) return { url: PLATFORM_SEARCH[key](q), auto: true };
+  return null;
+}
+function watchLabel(show, target) {
+  if (!show.platform) return T('watch');
+  return target.auto ? T('searchOn', show.platform) : T('watchOn', show.platform);
+}
 function watchBtn(show, cls) {
-  if (!isWatchUrl(show.watchUrl)) return '';
-  const label = show.platform ? T('watchOn', show.platform) : T('watch');
-  return `<a class="${cls}" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(label)}">${icon('play')}</a>`;
+  const target = watchTarget(show);
+  if (!target) return '';
+  return `<a class="${cls}" href="${esc(target.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(watchLabel(show, target))}">${icon('play')}</a>`;
 }
 function cardHTML(show) {
   const play = watchBtn(show, 'play-btn');
@@ -694,8 +714,9 @@ function emptyHTML(title, body, extra = '') {
 
 function todayRowHTML(show, { resume = false } = {}) {
   const sec = secondaryTitle(show);
-  const watch = (isWatchUrl(show.watchUrl)
-    ? `<a class="btn primary small watch-now" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(T('watch'))}</a>`
+  const target = watchTarget(show);
+  const watch = (target
+    ? `<a class="btn primary small watch-now" href="${esc(target.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(watchLabel(show, target))}">${icon('play')}${esc(T('watch'))}</a>`
     : '') + (resume ? `<button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${esc(T('resume'))}</button>` : '');
   return `
     <div class="trow">
@@ -819,7 +840,7 @@ function renderToday(list) {
     ? emptyHTML(T('todayEmptyTitle'), T('todayEmpty'))
     : (!current && !others && state.pf ? emptyHTML(T('emptyFilterTitle'), T('pfEmpty')) : '');
   list.innerHTML = pageHead(T('todayTitle'), T('todayHint')) + pfChipsHTML(pool) +
-    (current || (pool.length ? '' : nothing)) + nextUpHTML() + others + (pool.length ? nothing : '');
+    nextUpHTML() + (current || (pool.length ? '' : nothing)) + others + (pool.length ? nothing : '');
 }
 
 function renderNext(list) {
@@ -1269,9 +1290,13 @@ function openEditor(id) {
   function renderWatchTop() {
     const box = $('[data-watch-top]', body);
     const parts = [];
-    if (isWatchUrl(show.watchUrl)) {
-      parts.push(`<a class="btn primary watch-big" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(show.platform ? T('watchOn', show.platform) : T('watch'))}</a>`);
+    const target = watchTarget(show);
+    if (target) {
+      parts.push(`<a class="btn primary watch-big" href="${esc(target.url)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(watchLabel(show, target))}</a>`);
     }
+    // Explain the automatic search under the link field.
+    const hint = $('[data-watch-hint]', body);
+    if (hint && hint.className === 'hint') hint.textContent = target && target.auto ? T('autoLinkHint', show.platform) : T('watchLinkHint');
     const q = searchQueryFor(show).trim();
     if (show.imdb) parts.push(linkBtn(imdbUrl(show.imdb), esc(T('imdb')), 'btn imdb-btn'));
     else if (q) {

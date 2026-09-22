@@ -86,7 +86,8 @@ const STRINGS = {
     pickForMe: 'תבחר לי סדרה', pickAgain: 'הצעה אחרת', startWatching: 'מתחיל לראות', details: 'פרטים',
     started: 'עברה ל"{0}"', undo: 'ביטול', yourPick: 'ההצעה:',
     imdb: 'IMDb', imdbField: 'קישור ל-IMDb', imdbHint: 'מתמלא לבד כשבוחרים התאמה מ-TVmaze. אפשר גם להדביק קישור מ-IMDb.',
-    badImdb: 'צריך קישור לדף של סדרה ב-IMDb (מכיל /title/tt…).', imdbSearch: 'חיפוש ב-IMDb',
+    badImdb: 'צריך קישור לדף של סדרה ב-IMDb (מכיל /title/tt…).', imdbFind: 'מציאת הסדרה ב-IMDb', googleSearch: 'חיפוש בגוגל',
+    imdbFound: 'נשמר קישור ל-IMDb', imdbNotFound: 'ל-TVmaze אין קישור IMDb לסדרה הזו. נסו "חיפוש בגוגל" או הדביקו קישור.',
     platforms: 'איפה רואים', platformsHint: 'האפשרויות שמופיעות בכל סדרה. "לא ידוע" תמיד קיים.',
     addPlatform: 'הוספת פלטפורמה', platformName: 'שם הפלטפורמה',
     deletePlatformConfirm: 'למחוק את "{0}"? {1} סדרות יעברו ל"לא ידוע".',
@@ -147,7 +148,8 @@ const STRINGS = {
     pickForMe: 'Pick one for me', pickAgain: 'Another one', startWatching: 'Start watching', details: 'Details',
     started: 'Moved to “{0}”', undo: 'Undo', yourPick: 'How about:',
     imdb: 'IMDb', imdbField: 'IMDb link', imdbHint: 'Filled in automatically when you pick a TVmaze match. You can also paste an IMDb link.',
-    badImdb: 'Needs an IMDb series link (contains /title/tt…).', imdbSearch: 'Search IMDb',
+    badImdb: 'Needs an IMDb series link (contains /title/tt…).', imdbFind: 'Find it on IMDb', googleSearch: 'Search Google',
+    imdbFound: 'IMDb link saved', imdbNotFound: 'TVmaze has no IMDb link for this series. Try “Search Google” or paste a link.',
     platforms: 'Where I watch', platformsHint: 'The options shown on every series. “Unknown” is always there.',
     addPlatform: 'Add platform', platformName: 'Platform name',
     deletePlatformConfirm: 'Delete “{0}”? {1} series will move to “Unknown”.',
@@ -252,7 +254,8 @@ function parseImdb(v) {
   return m ? m[1] : '';
 }
 const imdbUrl = (id) => `https://www.imdb.com/title/${id}/`;
-const imdbSearchUrl = (q) => `https://www.imdb.com/find/?q=${encodeURIComponent(q)}&s=tt&ttype=tv`;
+// The IMDb app doesn't open search links well, so the fallback is a Google search.
+const googleImdbUrl = (q) => `https://www.google.com/search?q=${encodeURIComponent(`${q} imdb`)}`;
 const isWatchUrl = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u.trim());
 
 function el(html) {
@@ -1193,7 +1196,10 @@ function openEditor(id) {
     }
     const q = searchQueryFor(show).trim();
     if (show.imdb) parts.push(linkBtn(imdbUrl(show.imdb), esc(T('imdb')), 'btn imdb-btn'));
-    else if (q) parts.push(linkBtn(imdbSearchUrl(q), `${icon('search')}${esc(T('imdbSearch'))}`, 'btn'));
+    else if (q) {
+      parts.push(`<button type="button" class="btn" data-imdb-find>${icon('search')}${esc(T('imdbFind'))}</button>`);
+      parts.push(linkBtn(googleImdbUrl(q), esc(T('googleSearch')), 'btn'));
+    }
     box.className = parts.length ? 'btn-row top-actions' : '';
     box.innerHTML = parts.join('');
   }
@@ -1279,6 +1285,22 @@ function openEditor(id) {
     show.platform = b.dataset.platform;
     renderPlatforms(); renderWatchTop();
     touch();
+  });
+  // Find the IMDb id through a TVmaze match (a direct /title/ link opens fine in the IMDb app).
+  $('[data-watch-top]', body).addEventListener('click', (e) => {
+    if (!e.target.closest('[data-imdb-find]')) return;
+    openPicker({
+      show,
+      onPick: (r) => {
+        show.tvmaze = { id: r.id, url: r.url, year: r.year, network: r.network };
+        if (r.imdb) show.imdb = r.imdb;
+        if (!show.image && r.image) show.image = r.image;
+        if (!show.platform && r.network) show.platform = matchPlatform(r.network, state.platforms);
+        syncFields(); renderImage();
+        touch();
+        toast(r.imdb ? T('imdbFound') : T('imdbNotFound'), r.imdb ? 2600 : 6000);
+      },
+    });
   });
   $('#fImdb', body).addEventListener('input', (e) => {
     const v = e.target.value.trim();

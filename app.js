@@ -25,7 +25,8 @@ const NEW_CATEGORY_COLORS = ['#e36414', '#0f9d9a', '#6a4c93', '#c9184a', '#2b934
 
 const DEFAULT_PLATFORMS = ['FlixHQ', 'Netflix', 'Apple TV (מחשב)', 'YouTube'];
 // Which page a category feeds: "today" (what to watch now), "next" (deciding what's next) or none.
-const DEFAULT_PAGES = { watching: 'today', upnext: 'next', maybe: 'next', retry: 'next', rewatch: 'next' };
+const DEFAULT_PAGES = { watching: 'today', paused: 'today', upnext: 'next', maybe: 'next', retry: 'next', rewatch: 'next' };
+const SCHEMA_VERSION = 2;
 const PAGES = ['today', 'next', 'fav', 'all'];
 const UNKNOWN_PF = '__none';
 
@@ -76,7 +77,10 @@ const STRINGS = {
     favOn: 'נוספה למועדפים', favOff: 'הוסרה מהמועדפים', movedTo: 'הועברה ל"{0}"',
     navToday: 'היום', navNext: 'הבא בתור', navFav: 'מועדפים', navAll: 'הכול',
     todayTitle: 'מה לראות היום', nextTitle: 'מה יהיה הבא?', favTitle: 'מועדפים', allTitle: 'כל הסדרות',
-    todayHint: 'הסדרות שאתה באמצע שלהן. ▶ פותח את הקישור לצפייה.',
+    todayHint: 'מה שבאמצע, מה הבא בתור, ומה בהפסקה. ▶ פותח את הקישור לצפייה.',
+    upNextTitle: 'הבאה בתור', noNextTitle: 'עוד לא נבחרה הסדרה הבאה', noNext: 'בדף "הבא בתור" מסמנים סדרה כהבאה.',
+    chooseNext: 'לבחירת הסדרה הבאה', changeNext: 'החלפה', setNext: 'הבאה בתור', unsetNext: 'הבאה בתור ✓',
+    nextSet: '"{0}" נקבעה כהבאה בתור', nextCleared: 'הוסרה מ"הבאה בתור"', resume: 'חזרה לצפייה',
     nextHint: 'המועמדים מהקטגוריות {0}.',
     todayEmptyTitle: 'אין כרגע סדרה בצפייה', todayEmpty: 'אפשר לבחור מה להתחיל בדף "הבא בתור".', goNext: 'לדף הבא בתור',
     nextEmptyTitle: 'אין מועמדים', nextEmpty: 'אין סדרות בקטגוריות של "הבא בתור".',
@@ -138,7 +142,10 @@ const STRINGS = {
     favOn: 'Added to favorites', favOff: 'Removed from favorites', movedTo: 'Moved to “{0}”',
     navToday: 'Today', navNext: 'Up next', navFav: 'Favorites', navAll: 'All',
     todayTitle: 'What to watch today', nextTitle: 'What’s next?', favTitle: 'Favorites', allTitle: 'All series',
-    todayHint: 'Series you’re in the middle of. ▶ opens the watch link.',
+    todayHint: 'What you’re in the middle of, what’s next, and what’s on hold. ▶ opens the watch link.',
+    upNextTitle: 'Next up', noNextTitle: 'No next series chosen yet', noNext: 'Mark one as next on the “Up next” page.',
+    chooseNext: 'Choose the next series', changeNext: 'Change', setNext: 'Next up', unsetNext: 'Next up ✓',
+    nextSet: '“{0}” is next up', nextCleared: 'Removed from “Next up”', resume: 'Resume',
     nextHint: 'Candidates from {0}.',
     todayEmptyTitle: 'Nothing in progress', todayEmpty: 'Pick what to start on the “Up next” page.', goNext: 'Go to Up next',
     nextEmptyTitle: 'No candidates', nextEmpty: 'No series in the “Up next” categories.',
@@ -175,6 +182,7 @@ const ICONS = {
   share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  pin: '<path d="M9 4h6l-1 5 3 3v2H7v-2l3-3zM12 14v6"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
   dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/><circle cx="15" cy="9" r="1.2"/><circle cx="9" cy="15" r="1.2"/>',
   library: '<rect x="4" y="4" width="4" height="16" rx="1"/><rect x="10" y="4" width="4" height="16" rx="1"/><path d="M16.5 5.2l3.3-.8 3 15.4-3.3.8z"/>',
@@ -268,6 +276,13 @@ function debounce(fn, ms) {
   return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
 }
 
+function pageFor(st, ver) {
+  let page = ['today', 'next', ''].includes(st.page) ? st.page : (DEFAULT_PAGES[st.id] || '');
+  // v2: "On hold" joined the Today page.
+  if (ver < 2 && st.id === 'paused' && page === '') page = 'today';
+  return page;
+}
+
 function matchPlatform(name, list) {
   const first = (v) => String(v || '').toLowerCase().split(/[\s+(–-]/)[0];
   const f = first(name);
@@ -302,7 +317,8 @@ let state;
 
 function defaultState() {
   return {
-    version: 1,
+    version: SCHEMA_VERSION,
+    nextId: null,
     lang: 'he', theme: 'system', view: 'grid', sort: 'updated', tab: 'all', page: 'today', pf: '',
     lastBackup: null,
     platforms: DEFAULT_PLATFORMS.slice(),
@@ -314,6 +330,7 @@ function defaultState() {
 // Validates anything loaded from storage or a backup file. Returns null if unusable.
 function normalizeState(raw) {
   if (!raw || typeof raw !== 'object' || !Array.isArray(raw.shows) || !Array.isArray(raw.statuses)) return null;
+  const ver = Number(raw.version) || 1;
   const seen = new Set();
   const statuses = raw.statuses
     .filter((s) => s && typeof s.id === 'string' && s.id && !seen.has(s.id) && seen.add(s.id))
@@ -322,7 +339,7 @@ function normalizeState(raw) {
       he: typeof s.he === 'string' ? s.he : '',
       en: typeof s.en === 'string' ? s.en : '',
       color: isColor(s.color) ? s.color : '#7d8196',
-      page: ['today', 'next', ''].includes(s.page) ? s.page : (DEFAULT_PAGES[s.id] || ''),
+      page: pageFor(s, ver),
     }));
   // Platforms: older saves had free text; map it onto the fixed list where it clearly matches.
   const hadPlatforms = Array.isArray(raw.platforms);
@@ -369,7 +386,8 @@ function normalizeState(raw) {
       return show;
     });
   return {
-    version: 1,
+    version: SCHEMA_VERSION,
+    nextId: typeof raw.nextId === 'string' && shows.some((s) => s.id === raw.nextId) ? raw.nextId : null,
     lang: raw.lang === 'en' ? 'en' : 'he',
     theme: ['light', 'dark'].includes(raw.theme) ? raw.theme : 'system',
     view: raw.view === 'list' ? 'list' : 'grid',
@@ -674,11 +692,11 @@ function emptyHTML(title, body, extra = '') {
   return `<div class="empty"><strong>${esc(title)}</strong>${esc(body)}${extra}</div>`;
 }
 
-function todayRowHTML(show) {
+function todayRowHTML(show, { resume = false } = {}) {
   const sec = secondaryTitle(show);
-  const watch = isWatchUrl(show.watchUrl)
+  const watch = (isWatchUrl(show.watchUrl)
     ? `<a class="btn primary small watch-now" href="${esc(show.watchUrl)}" target="_blank" rel="noopener noreferrer">${icon('play')}${esc(T('watch'))}</a>`
-    : '';
+    : '') + (resume ? `<button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${esc(T('resume'))}</button>` : '');
   return `
     <div class="trow">
       <button type="button" class="row-open" data-open="${esc(show.id)}">
@@ -689,14 +707,14 @@ function todayRowHTML(show) {
           <span class="card-meta">${metaParts(show)}</span>
         </span>
       </button>
-      ${watch}
+      ${watch ? `<div class="trow-actions">${watch}</div>` : ''}
     </div>`;
 }
 
 function candidateRowHTML(show) {
   const sec = secondaryTitle(show);
   return `
-    <div class="trow">
+    <div class="trow${state.nextId === show.id ? ' is-next' : ''}">
       <button type="button" class="row-open" data-open="${esc(show.id)}">
         ${posterHTML(show)}
         <span class="row-main">
@@ -707,6 +725,7 @@ function candidateRowHTML(show) {
       </button>
       <div class="trow-actions">
         <button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
+        ${nextToggleHTML(show)}
         ${imdbLink(show, 'btn small')}
       </div>
     </div>`;
@@ -725,6 +744,7 @@ function pickCardHTML(show) {
         <span class="card-meta"><span class="dot" style="--c:${st ? st.color : '#7d8196'}"></span>${esc(statusLabel(st))} · ${metaParts(show)}</span>
         <div class="btn-row">
           <button type="button" class="btn primary small" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
+          ${nextToggleHTML(show)}
           <button type="button" class="btn small" data-pick-again>${icon('dice')}${esc(T('pickAgain'))}</button>
           ${imdbLink(show, 'btn small')}
           <button type="button" class="btn small" data-open="${esc(show.id)}">${esc(T('details'))}</button>
@@ -733,17 +753,73 @@ function pickCardHTML(show) {
     </section>`;
 }
 
+// The series marked "next up" — only while it is still a candidate (not already on Today).
+function nextUpShow() {
+  const show = state.nextId && state.shows.find((s) => s.id === state.nextId);
+  if (!show || statusesForPage('today').some((c) => c.id === show.status)) return null;
+  return show;
+}
+function nextToggleHTML(show) {
+  const on = state.nextId === show.id;
+  return `<button type="button" class="btn small next-toggle" data-set-next="${esc(show.id)}" aria-pressed="${on}">${icon('pin')}${esc(on ? T('unsetNext') : T('setNext'))}</button>`;
+}
+function setNext(id) {
+  const show = state.shows.find((s) => s.id === id);
+  if (!show) return;
+  if (state.nextId === id) { state.nextId = null; toast(T('nextCleared')); }
+  else { state.nextId = id; toast(T('nextSet', primaryTitle(show))); }
+  save();
+  renderList();
+}
+function nextUpHTML() {
+  const show = nextUpShow();
+  const head = `<h3 class="group-head"><span style="color:var(--accent);display:inline-flex">${icon('pin')}</span>${esc(T('upNextTitle'))}</h3>`;
+  if (!show) {
+    return `<section class="group">${head}
+      <div class="next-empty"><span><strong>${esc(T('noNextTitle'))}</strong><br>${esc(T('noNext'))}</span>
+      <button type="button" class="btn small" data-goto="next">${esc(T('chooseNext'))}</button></div></section>`;
+  }
+  const sec = secondaryTitle(show);
+  return `
+    <section class="group">${head}
+      <div class="trow next-row">
+        <button type="button" class="row-open" data-open="${esc(show.id)}">
+          ${posterHTML(show)}
+          <span class="row-main">
+            <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
+            ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
+            <span class="card-meta">${metaParts(show)}</span>
+          </span>
+        </button>
+        <div class="trow-actions">
+          <button type="button" class="btn primary small" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
+          <button type="button" class="btn small" data-goto="next">${esc(T('changeNext'))}</button>
+          ${imdbLink(show, 'btn small')}
+        </div>
+      </div>
+    </section>`;
+}
+
 function renderToday(list) {
   const cats = statusesForPage('today');
   const pool = state.shows.filter((s) => cats.some((c) => c.id === s.status));
-  if (!pool.length) {
-    list.innerHTML = pageHead(T('todayTitle')) + emptyHTML(T('todayEmptyTitle'), T('todayEmpty'),
-      `<div><button type="button" class="btn primary" data-goto="next" style="margin-top:14px">${esc(T('goNext'))}</button></div>`);
-    return;
-  }
-  const items = pool.filter(pfMatches).sort((a, b) => b.updatedAt - a.updatedAt);
+  const [first, ...rest] = cats;
+  const group = (st, opts) => {
+    const g = pool.filter((s) => s.status === st.id && pfMatches(s)).sort((a, b) => b.updatedAt - a.updatedAt);
+    if (!g.length) return '';
+    return `
+      <section class="group">
+        <h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${g.length}</span></h3>
+        <div class="rows">${g.map((s) => todayRowHTML(s, opts)).join('')}</div>
+      </section>`;
+  };
+  const current = first ? group(first) : '';
+  const others = rest.map((st) => group(st, { resume: true })).join('');
+  const nothing = !pool.length
+    ? emptyHTML(T('todayEmptyTitle'), T('todayEmpty'))
+    : (!current && !others && state.pf ? emptyHTML(T('emptyFilterTitle'), T('pfEmpty')) : '');
   list.innerHTML = pageHead(T('todayTitle'), T('todayHint')) + pfChipsHTML(pool) +
-    (items.length ? `<div class="rows">${items.map(todayRowHTML).join('')}</div>` : emptyHTML(T('emptyFilterTitle'), T('pfEmpty')));
+    (current || (pool.length ? '' : nothing)) + nextUpHTML() + others + (pool.length ? nothing : '');
 }
 
 function renderNext(list) {
@@ -787,14 +863,16 @@ function startWatching(id) {
   const target = statusesForPage('today')[0] || statusById('watching') || state.statuses[0];
   if (!show || !target) return;
   const prev = { status: show.status, updatedAt: show.updatedAt };
+  const prevNext = state.nextId;
   show.status = target.id;
   show.updatedAt = Date.now();
   if (nextPick === id) nextPick = null;
+  if (state.nextId === id) state.nextId = null;
   save();
   renderList();
   toast(T('started', statusLabel(target)), 5000, {
     label: T('undo'),
-    fn: () => { Object.assign(show, prev); save(); renderList(); },
+    fn: () => { Object.assign(show, prev); state.nextId = prevNext; save(); renderList(); },
   });
 }
 
@@ -1750,6 +1828,8 @@ function init() {
     if (pf) { state.pf = pf.dataset.pf; nextPick = null; save(); renderList(); return; }
     const start = e.target.closest('[data-start]');
     if (start) { startWatching(start.dataset.start); return; }
+    const pin = e.target.closest('[data-set-next]');
+    if (pin) { setNext(pin.dataset.setNext); return; }
     if (e.target.closest('[data-pick-again]')) { pickRandom(); return; }
     const go = e.target.closest('[data-goto]');
     if (go) { state.page = go.dataset.goto; save(); renderList(); return; }

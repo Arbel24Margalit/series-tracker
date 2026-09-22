@@ -527,3 +527,15 @@ a.btn { text-decoration: none; }
 .card-sub { display: block; margin-top: 0; }
 .start-btn { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); font-weight: 600; }
 .start-btn svg.i { fill: currentColor; stroke: none; width: 14px; height: 14px; }
+
+/* Next up */
+.next-row { border: 2px solid var(--accent); }
+.trow.is-next { box-shadow: inset 0 0 0 2px var(--accent), var(--shadow); }
+.next-toggle svg.i { width: 15px; height: 15px; }
+.next-toggle[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.next-empty {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px; border-radius: var(--radius);
+  border: 1.5px dashed var(--line); color: var(--ink-2); font-size: 14px;
+}
+.next-empty strong { color: var(--ink); }

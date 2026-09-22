@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>הסדרות שלי</title>
+<meta name="description" content="מעקב צפייה אישי בסדרות">
+<meta name="theme-color" content="#f2f3f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14151c" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Secular+One&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-row">
+    <h1 class="brand"><span class="brand-dot" aria-hidden="true"></span><span id="brandText">הסדרות שלי</span></h1>
+    <div class="topbar-actions">
+      <button type="button" class="icon-btn" id="viewToggle" aria-label="תצוגה"></button>
+      <button type="button" class="icon-btn" id="settingsBtn" aria-label="הגדרות"></button>
+    </div>
+  </div>
+  <div class="search-row">
+    <label class="search">
+      <span class="search-icon" aria-hidden="true"></span>
+      <input type="search" id="searchInput" autocomplete="off" enterkeyhint="search">
+    </label>
+    <select id="sortSelect" class="sort-select" aria-label="מיון"></select>
+  </div>
+  <nav class="chips" id="chips" aria-label="קטגוריות"></nav>
+</header>
+
+<main id="list" class="list" aria-live="polite"></main>
+
+<button type="button" class="fab" id="addBtn"><span aria-hidden="true">+</span><span id="addBtnText">הוספת סדרה</span></button>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

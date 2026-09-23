@@ -35,75 +35,76 @@ const DEFAULT_VIEWS = { today: 'list', next: 'list', fav: 'grid', all: 'grid' };
 const STRINGS = {
   he: {
     appName: 'הסדרות שלי', search: 'חיפוש סדרה, פלטפורמה או הערה…', sort: 'מיון',
-    sortUpdated: 'עודכן לאחרונה', sortAdded: 'נוסף לאחרונה', sortTitle: 'לפי שם', sortRating: 'לפי דירוג',
+    sortUpdated: 'עודכנו לאחרונה', sortAdded: 'נוספו לאחרונה', sortTitle: 'לפי שם', sortRating: 'לפי דירוג',
     all: 'הכול', favorites: 'מועדפים', toCheck: 'לבדיקה',
-    addSeries: 'הוספת סדרה', add: 'הוספה', close: 'סגירה', cancel: 'ביטול', save: 'שמירה', settings: 'הגדרות',
+    addSeries: 'הוספת סדרה', add: 'הוספה', close: 'סגירה', cancel: 'ביטול', save: 'שמירה', settings: 'הגדרות', done: 'סיום',
     viewGrid: 'תצוגת כרטיסים', viewList: 'תצוגת רשימה',
-    title: 'שם הסדרה', altTitle: 'שם נוסף (בשפה השנייה)', altHint: 'למשל השם באנגלית – עוזר לחיפוש תמונה',
+    title: 'שם הסדרה', altTitle: 'שם נוסף (בשפה השנייה)', altHint: 'למשל השם באנגלית. עוזר למצוא תמונה.',
     status: 'סטטוס צפייה', favorite: 'במועדפים', platform: 'איפה רואים', season: 'עונה נוכחית',
-    watchLink: 'קישור לצפייה', watchLinkHint: 'הקישור לדף של הסדרה עצמה. לחיצה על "צפייה" תפתח אותו.',
+    watchLink: 'קישור לצפייה', watchLinkHint: 'קישור לדף של הסדרה. הכפתור "צפייה" יפתח אותו.',
     watch: 'צפייה', watchOn: 'צפייה ב-{0}', searchOn: 'חיפוש ב-{0}',
-    autoLinkHint: 'אין קישור שמור, אז ▶ יחפש את הסדרה ב-{0}. קישור שתדביק כאן יחליף את החיפוש.', badWatchLink: 'הקישור צריך להתחיל ב-https:// (העתיקו אותו משורת הכתובת).',
+    autoLinkHint: 'אין קישור שמור, ולכן ▶ יחפש את הסדרה ב-{0}. קישור שיודבק כאן יחליף את החיפוש.', badWatchLink: 'הקישור צריך להתחיל ב-https:// (אפשר להעתיק אותו משורת הכתובת).',
     rating: 'הדירוג שלי', note: 'הערה', needsCheck: 'לסמן לבדיקה', needsCheckHint: 'למשל כשלא בטוחים בשם או בקטגוריה',
     image: 'תמונה', findImage: 'חיפוש תמונה ב-TVmaze', pasteLink: 'הדבקת קישור לתמונה', uploadImage: 'העלאה מהטלפון',
     removeImage: 'הסרת התמונה', useLink: 'שימוש בקישור', badLink: 'הקישור צריך להתחיל ב-https://',
-    deleteSeries: 'מחיקת הסדרה', deleteConfirm: 'למחוק את "{0}"? אי אפשר לבטל.', delete: 'מחיקה', deleted: 'הסדרה נמחקה',
-    added: 'נוספה לרשימה', titleRequired: 'צריך לכתוב שם לסדרה',
-    duplicate: 'הסדרה כבר ברשימה, בקטגוריה "{0}".', openExisting: 'לפתוח את הקיימת',
-    updated: 'עודכן', addedOn: 'נוסף',
-    tvmazeTitle: 'חיפוש ב-TVmaze', searchBtn: 'חיפוש', searching: 'מחפש…', noResults: 'לא נמצאו תוצאות. נסו את השם באנגלית.',
-    netError: 'אין חיבור ל-TVmaze. בדקו את החיבור לאינטרנט ונסו שוב.', rateError: 'יותר מדי חיפושים ברצף. חכו כמה שניות ונסו שוב.',
-    suggestions: 'התאמות מ-TVmaze – בחרו כדי להוסיף תמונה', matched: 'מקושר ל-TVmaze', unlink: 'ביטול הקישור',
+    deleteSeries: 'מחיקת הסדרה', deleteConfirm: 'למחוק את "{0}"? אי אפשר לבטל את זה.', delete: 'מחיקה', deleted: 'הסדרה נמחקה',
+    added: 'הסדרה נוספה', titleRequired: 'צריך לכתוב שם לסדרה',
+    duplicate: 'הסדרה כבר ברשימה, בקטגוריה "{0}".', openExisting: 'פתיחת הסדרה הקיימת',
+    updated: 'עודכנה', addedOn: 'נוספה',
+    tvmazeTitle: 'חיפוש ב-TVmaze', searchBtn: 'חיפוש', searching: 'בחיפוש…', noResults: 'לא נמצאו תוצאות. כדאי לנסות את השם באנגלית.',
+    netError: 'אין חיבור ל-TVmaze. כדאי לבדוק את החיבור לאינטרנט ולנסות שוב.', rateError: 'יותר מדי חיפושים ברצף. אפשר לנסות שוב בעוד כמה שניות.',
+    suggestions: 'התאמות מ-TVmaze. בחירה בהתאמה מוסיפה תמונה.', matched: 'מקושרת ל-TVmaze', unlink: 'ביטול הקישור',
     credit: 'מידע ותמונות: TVmaze.com (רישיון CC BY-SA)',
-    skip: 'דלג', finish: 'סיום', progress: '{0} מתוך {1}', fillDone: 'סיימנו לעבור על הסדרות',
-    emptyAllTitle: 'עוד אין כאן סדרות', emptyAll: 'לחצו על "הוספת סדרה" כדי להתחיל.',
-    emptyFilterTitle: 'אין סדרות כאן', emptyFilter: 'שום סדרה לא מתאימה לסינון הזה.',
+    skip: 'דילוג', finish: 'סיום', progress: '{0} מתוך {1}', fillDone: 'המעבר על הסדרות הסתיים',
+    emptyAllTitle: 'עוד אין כאן סדרות', emptyAll: 'אפשר להוסיף סדרה בכפתור +.',
+    emptyFilterTitle: 'אין סדרות כאן', emptyFilter: 'אין סדרות שמתאימות לסינון הזה.',
     emptySearch: 'לא נמצאה סדרה בשם "{0}".',
     seasonShort: 'עונה {0}', flag: 'לבדיקה',
-    language: 'שפה', theme: 'ערכת צבעים', themeSystem: 'לפי המכשיר', themeLight: 'בהיר', themeDark: 'כהה',
-    categories: 'קטגוריות', categoriesHint: 'שם בעברית ובאנגלית, צבע וסדר. שינויים נשמרים מיד.',
+    language: 'שפה', theme: 'ערכת צבעים', themeSystem: 'לפי המכשיר', themeLight: 'בהירה', themeDark: 'כהה',
+    cinemaAlwaysDark: 'בעיצוב "קולנוע" הערכה תמיד כהה.',
+    categories: 'קטגוריות', categoriesHint: 'שם, צבע, סדר והדף שבו הקטגוריה מופיעה. השינויים נשמרים מיד.',
     nameHe: 'שם בעברית', nameEn: 'שם באנגלית', addCategory: 'הוספת קטגוריה', unnamed: 'ללא שם',
     seriesCount: '{0} סדרות', oneSeries: 'סדרה אחת', noSeries: 'אין סדרות',
     deleteCategory: 'מחיקה', deleteCategoryConfirm: 'למחוק את הקטגוריה "{0}"?',
-    moveTo: 'מה לעשות עם {0} הסדרות שבה? להעביר אל:', moveAndDelete: 'להעביר ולמחוק',
-    lastCategory: 'חייבת להישאר לפחות קטגוריה אחת', moveUp: 'למעלה', moveDown: 'למטה',
+    moveTo: 'יש בה {0} סדרות. להעביר אותן אל:', moveAndDelete: 'העברה ומחיקה',
+    lastCategory: 'חייבת להישאר לפחות קטגוריה אחת', moveUp: 'הזזה למעלה', moveDown: 'הזזה למטה',
     posters: 'תמונות', fillMissing: 'השלמת תמונות חסרות ({0})', noMissing: 'לכל הסדרות יש תמונה',
-    backup: 'גיבוי', backupHint: 'הנתונים שמורים רק בדפדפן הזה בטלפון. כדאי לשמור קובץ גיבוי מדי פעם (למשל ל-Google Drive).',
+    backup: 'גיבוי', backupHint: 'הרשימה שמורה רק בדפדפן של הטלפון הזה. כדאי לשמור מדי פעם קובץ גיבוי, למשל ב-Google Drive.',
+    backupDue: 'לא נשמר גיבוי כבר יותר מחודש', backupNeeded: 'מומלץ לשמור גיבוי',
     exportFile: 'שמירת קובץ גיבוי', shareFile: 'שיתוף קובץ גיבוי', importFile: 'שחזור מקובץ גיבוי',
     lastBackup: 'גיבוי אחרון: {0}', neverBackedUp: 'עוד לא נשמר גיבוי',
     importConfirm: 'השחזור יחליף את כל הרשימה הנוכחית ({0} סדרות) בתוכן הקובץ ({1} סדרות). להמשיך?',
-    replace: 'להחליף', imported: 'הרשימה שוחזרה מהקובץ', badFile: 'הקובץ הזה אינו קובץ גיבוי של האתר.',
-    exported: 'קובץ הגיבוי נשמר', storageError: 'השמירה נכשלה – הזיכרון של הדפדפן מלא. נסו להסיר תמונות שהועלו מהטלפון.',
-    imageTooBig: 'לא הצלחתי לקרוא את התמונה. נסו תמונה אחרת.',
-    about: 'על האתר', aboutText: 'מעקב צפייה אישי. אין חשבון ואין שרת – הכול נשמר אצלכם במכשיר.',
+    replace: 'החלפה', imported: 'הרשימה שוחזרה מהקובץ', badFile: 'זה לא קובץ גיבוי של האתר.',
+    exported: 'קובץ הגיבוי נשמר', storageError: 'השמירה נכשלה: הזיכרון של הדפדפן מלא. אפשר לפנות מקום בהסרת תמונות שהועלו מהטלפון.',
+    imageTooBig: 'לא ניתן לקרוא את התמונה. אפשר לנסות תמונה אחרת.',
+    about: 'על האתר', aboutText: 'מעקב צפייה אישי, בלי חשבון ובלי שרת. הכול נשמר במכשיר.',
     favOn: 'נוספה למועדפים', favOff: 'הוסרה מהמועדפים', movedTo: 'הועברה ל"{0}"',
     navToday: 'היום', navNext: 'הבא בתור', navFav: 'מועדפים', navAll: 'הכול',
-    todayTitle: 'מה לראות היום', nextTitle: 'מה יהיה הבא?', favTitle: 'מועדפים', allTitle: 'כל הסדרות',
-    todayHint: 'מה הבא בתור, מה שבאמצע, ומה בהפסקה. ▶ פותח את הקישור לצפייה. גרירת סדרה שמאלה מעבירה אותה לקטגוריה אחרת.',
-    moveTitle: 'להעביר את "{0}" אל:', current: 'עכשיו', openDetails: 'פתיחת הפרטים',
+    moveTitle: 'להעביר את "{0}" אל:', current: 'נוכחית', openDetails: 'פתיחת הפרטים',
     searchAll: 'חיפוש בכל הסדרות…', openSearch: 'חיפוש', closeSearch: 'סגירת החיפוש',
     design: 'עיצוב', designClassic: 'קלאסי', designCinema: 'קולנוע', designCompact: 'צפוף',
     designClassicHint: 'המראה הרגיל: כרטיסים עם צל ורווחים נוחים.',
     designCinemaHint: 'תמיד כהה, פוסטרים גדולים בשני טורים ותפריט צף.',
     designCompactHint: 'הרבה סדרות במסך אחד: שורות צפופות ותמונות קטנות.',
-    upNextTitle: 'הבאה בתור', noNextTitle: 'עוד לא נבחרה הסדרה הבאה', noNext: 'בדף "הבא בתור" מסמנים סדרה כהבאה.',
-    chooseNext: 'לבחירת הסדרה הבאה', changeNext: 'החלפה', setNext: 'הבאה בתור', unsetNext: 'הבאה בתור ✓',
-    nextSet: '"{0}" נקבעה כהבאה בתור', nextCleared: 'הוסרה מ"הבאה בתור"', resume: 'חזרה לצפייה',
-    nextHint: 'המועמדים מהקטגוריות {0}.',
-    todayEmptyTitle: 'אין כרגע סדרה בצפייה', todayEmpty: 'אפשר לבחור מה להתחיל בדף "הבא בתור".', goNext: 'לדף הבא בתור',
-    nextEmptyTitle: 'אין מועמדים', nextEmpty: 'אין סדרות בקטגוריות של "הבא בתור".',
-    favEmptyTitle: 'עוד אין מועדפים', favEmpty: 'לוחצים על הכוכב בכרטיס של סדרה כדי להוסיף אותה לכאן.',
-    pfEmpty: 'אין סדרות כאן בפלטפורמה שנבחרה.',
-    anyPlatform: 'הכול', unknownPlatform: 'לא ידוע',
-    pickForMe: 'תבחר לי סדרה', pickAgain: 'הצעה אחרת', startWatching: 'מתחיל לראות', details: 'פרטים',
-    started: 'עברה ל"{0}"', undo: 'ביטול', yourPick: 'ההצעה:',
-    imdb: 'IMDb', imdbField: 'קישור ל-IMDb', imdbHint: 'מתמלא לבד כשבוחרים התאמה מ-TVmaze. אפשר גם להדביק קישור מ-IMDb.',
-    badImdb: 'צריך קישור לדף של סדרה ב-IMDb (מכיל /title/tt…).', imdbFind: 'מציאת הסדרה ב-IMDb', googleSearch: 'חיפוש בגוגל',
-    imdbFound: 'נשמר קישור ל-IMDb', imdbNotFound: 'ל-TVmaze אין קישור IMDb לסדרה הזו. נסו "חיפוש בגוגל" או הדביקו קישור.',
-    platforms: 'איפה רואים', platformsHint: 'האפשרויות שמופיעות בכל סדרה. "לא ידוע" תמיד קיים.',
+    upNextTitle: 'הסדרה הבאה', noNextTitle: 'עוד לא נבחרה סדרה הבאה', noNext: 'אפשר לבחור אותה בדף "הבא בתור".',
+    chooseNext: 'לבחירה', changeNext: 'החלפה', setNext: 'לסמן כבאה', unsetNext: 'מסומנת כבאה ✓',
+    nextSet: '"{0}" סומנה כסדרה הבאה', nextCleared: 'הסימון כסדרה הבאה הוסר', resume: 'חזרה לצפייה',
+    todayEmptyTitle: 'אין כרגע סדרה בצפייה', todayEmpty: 'אפשר לבחור מה להתחיל בדף "הבא בתור".',
+    nextEmptyTitle: 'אין מועמדות', nextEmpty: 'אין סדרות בקטגוריות של "הבא בתור".',
+    favEmptyTitle: 'עוד אין מועדפים', favEmpty: 'לחיצה על הכוכב בכרטיס של סדרה מוסיפה אותה לכאן.',
+    unknownPlatform: 'לא ידוע',
+    pickForMe: 'בחירה אקראית', pickAgain: 'הצעה אחרת', startWatching: 'התחלתי לראות', details: 'פרטים',
+    started: 'הועברה ל"{0}"', undo: 'ביטול', yourPick: 'ההצעה:',
+    imdb: 'IMDb', imdbField: 'קישור ל-IMDb', imdbHint: 'מתמלא לבד כשבוחרים התאמה מ-TVmaze, ואפשר גם להדביק כאן קישור.',
+    badImdb: 'צריך קישור לדף של סדרה ב-IMDb.', imdbFind: 'מציאה ב-IMDb', googleSearch: 'חיפוש בגוגל',
+    imdbFound: 'הקישור ל-IMDb נשמר', imdbNotFound: 'ל-TVmaze אין קישור ל-IMDb עבור הסדרה הזו. אפשר לנסות "חיפוש בגוגל" או להדביק קישור.',
+    platforms: 'איפה רואים', platformsHint: 'האפשרויות שמופיעות בכל סדרה. האפשרות "לא ידוע" תמיד קיימת.',
     addPlatform: 'הוספת פלטפורמה', platformName: 'שם הפלטפורמה',
     deletePlatformConfirm: 'למחוק את "{0}"? {1} סדרות יעברו ל"לא ידוע".',
     categoryPage: 'מופיעה בדף', pageToday: 'היום', pageNext: 'הבא בתור', pageNone: 'רק ב"הכול"',
+    discardTitle: 'לבטל את ההוספה?', discardBody: 'מה שהוקלד לא יישמר.', discard: 'ביטול ההוספה', keepEditing: 'המשך עריכה',
+    swipeHint: 'טיפ: החלקה שמאלה או לחיצה ארוכה על סדרה מעבירות אותה לקטגוריה אחרת.',
+    saved: 'השינויים נשמרו',
   },
   en: {
     appName: 'My Series', search: 'Search a series, platform or note…', sort: 'Sort',
@@ -150,32 +151,32 @@ const STRINGS = {
     about: 'About', aboutText: 'A personal watch tracker. No account and no server – everything stays on your device.',
     favOn: 'Added to favorites', favOff: 'Removed from favorites', movedTo: 'Moved to “{0}”',
     navToday: 'Today', navNext: 'Up next', navFav: 'Favorites', navAll: 'All',
-    todayTitle: 'What to watch today', nextTitle: 'What’s next?', favTitle: 'Favorites', allTitle: 'All series',
-    todayHint: 'What’s next, what you’re in the middle of, and what’s on hold. ▶ opens the watch link. Swipe a series left to move it to another category.',
     moveTitle: 'Move “{0}” to:', current: 'current', openDetails: 'Open details',
     searchAll: 'Search all series…', openSearch: 'Search', closeSearch: 'Close search',
     design: 'Design', designClassic: 'Classic', designCinema: 'Cinema', designCompact: 'Compact',
     designClassicHint: 'The standard look: shadowed cards and comfortable spacing.',
     designCinemaHint: 'Always dark, large posters in two columns, floating menu.',
     designCompactHint: 'Many series per screen: dense rows and small thumbnails.',
-    upNextTitle: 'Next up', noNextTitle: 'No next series chosen yet', noNext: 'Mark one as next on the “Up next” page.',
-    chooseNext: 'Choose the next series', changeNext: 'Change', setNext: 'Next up', unsetNext: 'Next up ✓',
-    nextSet: '“{0}” is next up', nextCleared: 'Removed from “Next up”', resume: 'Resume',
-    nextHint: 'Candidates from {0}.',
-    todayEmptyTitle: 'Nothing in progress', todayEmpty: 'Pick what to start on the “Up next” page.', goNext: 'Go to Up next',
+    upNextTitle: 'Next series', noNextTitle: 'No next series chosen yet', noNext: 'Choose one on the “Up next” page.',
+    chooseNext: 'Choose', changeNext: 'Change', setNext: 'Mark as next', unsetNext: 'Marked as next ✓',
+    nextSet: '“{0}” is the next series', nextCleared: 'No longer marked as next', resume: 'Resume',
+    todayEmptyTitle: 'Nothing in progress', todayEmpty: 'Pick what to start on the “Up next” page.',
     nextEmptyTitle: 'No candidates', nextEmpty: 'No series in the “Up next” categories.',
-    favEmptyTitle: 'No favorites yet', favEmpty: 'Tap the star on a series card to add it here.',
-    pfEmpty: 'No series here on the selected platform.',
-    anyPlatform: 'All', unknownPlatform: 'Unknown',
-    pickForMe: 'Pick one for me', pickAgain: 'Another one', startWatching: 'Start watching', details: 'Details',
+    favEmptyTitle: 'No favorites yet', favEmpty: 'Tap the star on a series card to add it here.', unknownPlatform: 'Unknown',
+    pickForMe: 'Random pick', pickAgain: 'Another one', startWatching: 'Started watching', details: 'Details',
     started: 'Moved to “{0}”', undo: 'Undo', yourPick: 'How about:',
     imdb: 'IMDb', imdbField: 'IMDb link', imdbHint: 'Filled in automatically when you pick a TVmaze match. You can also paste an IMDb link.',
-    badImdb: 'Needs an IMDb series link (contains /title/tt…).', imdbFind: 'Find it on IMDb', googleSearch: 'Search Google',
+    badImdb: 'Needs an IMDb series link (contains /title/tt…).', imdbFind: 'Find on IMDb', googleSearch: 'Search Google',
     imdbFound: 'IMDb link saved', imdbNotFound: 'TVmaze has no IMDb link for this series. Try “Search Google” or paste a link.',
     platforms: 'Where I watch', platformsHint: 'The options shown on every series. “Unknown” is always there.',
     addPlatform: 'Add platform', platformName: 'Platform name',
     deletePlatformConfirm: 'Delete “{0}”? {1} series will move to “Unknown”.',
     categoryPage: 'Shows on page', pageToday: 'Today', pageNext: 'Up next', pageNone: 'Only in “All”',
+    done: 'Done', cinemaAlwaysDark: 'The Cinema design is always dark.',
+    backupDue: 'No backup for over a month', backupNeeded: 'A backup is recommended',
+    discardTitle: 'Discard this series?', discardBody: 'What you typed won’t be saved.', discard: 'Discard', keepEditing: 'Keep editing',
+    swipeHint: 'Tip: swipe a series left, or long-press it, to move it to another category.',
+    saved: 'Changes saved',
   },
 };
 
@@ -197,6 +198,7 @@ const ICONS = {
   share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4M8.2 13.2l7.6 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  queue: '<path d="M4 6h11M4 12h11M4 18h7"/><path d="M17 15l3 3-3 3"/>',
   pin: '<path d="M9 4h6l-1 5 3 3v2H7v-2l3-3zM12 14v6"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
   dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/><circle cx="15" cy="9" r="1.2"/><circle cx="9" cy="15" r="1.2"/>',
@@ -418,6 +420,7 @@ function normalizeState(raw) {
       return [pg, v === 'grid' || v === 'list' ? v : legacy];
     })),
     lastBackup: Number.isFinite(raw.lastBackup) ? raw.lastBackup : null,
+    swipeHintShown: raw.swipeHintShown === true,
     platforms, statuses, shows,
   };
 }
@@ -488,9 +491,10 @@ function toast(msg, ms = 2600, action) {
 
 /* ---------- Layers (sheets + dialogs) tied to the Android back button ---------- */
 const layers = [];
-function openLayer(node, onClose) {
+// guard(): return true to ask before this layer closes (back button, backdrop, ✕).
+function openLayer(node, onClose, guard) {
   document.body.appendChild(node);
-  layers.push({ node, onClose });
+  layers.push({ node, onClose, guard, forced: false });
   document.body.classList.add('locked');
   history.pushState({ depth: layers.length }, '');
   node.addEventListener('click', (e) => { if (e.target === node) closeTop(); });
@@ -501,13 +505,36 @@ function closeTop(count = 1) {
 window.addEventListener('popstate', (e) => {
   const depth = (e.state && e.state.depth) || 0;
   while (layers.length > depth) {
-    const top = layers.pop();
+    const top = layers[layers.length - 1];
+    if (top.guard && !top.forced && top.guard()) {
+      // Put the history entry back and ask first.
+      history.pushState({ depth: layers.length }, '');
+      askDiscard(top);
+      break;
+    }
+    layers.pop();
     top.node.remove();
     if (top.onClose) top.onClose();
   }
   if (!layers.length) document.body.classList.remove('locked');
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && layers.length) closeTop(); });
+
+function askDiscard(layer) {
+  const dlg = el(`
+    <div class="layer center" role="alertdialog" aria-modal="true">
+      <div class="sheet">
+        <div class="sheet-body"><p style="margin:0"><strong>${esc(T('discardTitle'))}</strong><br>${esc(T('discardBody'))}</p></div>
+        <div class="sheet-foot">
+          <button type="button" class="btn grow" data-no>${esc(T('keepEditing'))}</button>
+          <button type="button" class="btn grow danger solid" data-yes>${esc(T('discard'))}</button>
+        </div>
+      </div>
+    </div>`);
+  openLayer(dlg);
+  $('[data-no]', dlg).addEventListener('click', () => closeTop());
+  $('[data-yes]', dlg).addEventListener('click', () => { layer.forced = true; closeTop(2); });
+}
 
 function sheetShell(title, { center = false } = {}) {
   return el(`
@@ -585,7 +612,7 @@ let query = '';
 function tabMatches(show) {
   const tab = state.tab;
   if (tab === 'all') return true;
-  if (tab === 'fav') return show.favorite;
+  if (tab === 'fav') return show.favorite;  // older saved tab
   if (tab === 'check') return show.needsCheck;
   if (tab.startsWith('s:')) return show.status === tab.slice(2);
   return true;
@@ -609,11 +636,10 @@ function sortShows(list) {
 function renderChips() {
   // Drop a tab whose category was deleted.
   if (state.tab.startsWith('s:') && !statusById(state.tab.slice(2))) state.tab = 'all';
-  if (state.tab === 'check' && !state.shows.some((s) => s.needsCheck)) state.tab = 'all';
+  if ((state.tab === 'check' && !state.shows.some((s) => s.needsCheck)) || state.tab === 'fav') state.tab = 'all';
   const count = (fn) => state.shows.filter(fn).length;
   const chips = [
     { tab: 'all', label: T('all'), n: state.shows.length },
-    { tab: 'fav', label: T('favorites'), n: count((s) => s.favorite), star: true },
   ];
   const checkN = count((s) => s.needsCheck);
   if (checkN) chips.push({ tab: 'check', label: T('toCheck'), n: checkN, warn: true });
@@ -642,10 +668,14 @@ function posterHTML(show, { flag = false } = {}) {
 }
 function metaParts(show) {
   const parts = [];
-  parts.push(show.platform ? esc(show.platform) : `<span class="muted">${esc(T('unknownPlatform'))}</span>`);
+  if (show.platform) parts.push(esc(show.platform));
   if (show.season) parts.push(esc(T('seasonShort', show.season)));
   if (show.rating) parts.push(`<span style="color:var(--star)">★</span>${show.rating}`);
   return parts.join(' · ');
+}
+function metaHTML(show, extra = '') {
+  const m = metaParts(show);
+  return m || extra ? `<span class="card-meta">${extra}${m}</span>` : '';
 }
 function favBtn(show) {
   return `<button type="button" class="fav-btn" data-fav="${esc(show.id)}" aria-pressed="${show.favorite}" aria-label="${esc(T('favorite'))}">${icon('star')}</button>`;
@@ -682,7 +712,7 @@ function cardHTML(show) {
         ${posterHTML(show, { flag: true })}
         <span class="card-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
         ${secondaryTitle(show) ? `<span class="card-sub"><bdi>${esc(secondaryTitle(show))}</bdi></span>` : ''}
-        <span class="card-meta">${metaParts(show)}</span>
+        ${metaHTML(show)}
       </button>
       ${favBtn(show)}
     </div>`;
@@ -696,7 +726,7 @@ function rowHTML(show) {
         <span class="row-main">
           <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
           ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-          <span class="card-meta">${show.needsCheck ? `<span class="pill-flag">${esc(T('flag'))}</span>` : ''}${metaParts(show)}</span>
+          ${metaHTML(show, show.needsCheck ? `<span class="pill-flag">${esc(T('flag'))}</span>` : '')}
         </span>
       </button>
       ${watchBtn(show, 'row-play')}
@@ -724,7 +754,7 @@ function todayRowHTML(show, { resume = false } = {}) {
   const sec = secondaryTitle(show);
   const target = watchTarget(show);
   const watch = (target
-    ? `<a class="btn primary small watch-now" href="${esc(target.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(watchLabel(show, target))}">${icon('play')}${esc(T('watch'))}</a>`
+    ? `<a class="icon-start watch-now" href="${esc(target.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(watchLabel(show, target))}" title="${esc(watchLabel(show, target))}">${icon('play')}</a>`
     : '') + (resume ? `<button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${esc(T('resume'))}</button>` : '');
   return `
     <div class="trow">
@@ -733,7 +763,7 @@ function todayRowHTML(show, { resume = false } = {}) {
         <span class="row-main">
           <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
           ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-          <span class="card-meta">${metaParts(show)}</span>
+          ${metaHTML(show)}
         </span>
       </button>
       ${watch ? `<div class="trow-actions">${watch}</div>` : ''}
@@ -751,14 +781,16 @@ function candidateRowHTML(show) {
         <span class="row-main">
           <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
           ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-          <span class="card-meta">${metaParts(show)}</span>
+          ${metaHTML(show)}
         </span>
       </button>
+      ${state.nextId === show.id ? `
       <div class="trow-actions">
         <button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
         ${nextToggleHTML(show)}
         ${imdbLink(show, 'btn small')}
-      </div>
+      </div>` : `
+      <button type="button" class="icon-start" data-start="${esc(show.id)}" aria-label="${esc(T('startWatching'))}">${icon('play')}</button>`}
     </div>`;
 }
 
@@ -767,18 +799,17 @@ function pickCardHTML(show) {
   const st = statusById(show.status);
   return `
     <section class="pick" aria-live="polite">
-      <div class="pick-poster">${posterHTML(show)}</div>
+      <button type="button" class="pick-poster" data-open="${esc(show.id)}" aria-label="${esc(T('details'))}">${posterHTML(show)}</button>
       <div class="pick-main">
         <span class="page-hint">${esc(T('yourPick'))}</span>
-        <strong class="pick-title"><bdi>${esc(primaryTitle(show))}</bdi></strong>
+        <button type="button" class="pick-title" data-open="${esc(show.id)}"><bdi>${esc(primaryTitle(show))}</bdi></button>
         ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-        <span class="card-meta"><span class="dot" style="--c:${st ? st.color : '#7d8196'}"></span>${esc(statusLabel(st))} · ${metaParts(show)}</span>
+        <span class="card-meta"><span class="dot" style="--c:${st ? st.color : '#7d8196'}"></span>${esc(statusLabel(st))}${metaParts(show) ? ' · ' + metaParts(show) : ''}</span>
         <div class="btn-row">
           <button type="button" class="btn primary small" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
           ${nextToggleHTML(show)}
           <button type="button" class="btn small" data-pick-again>${icon('dice')}${esc(T('pickAgain'))}</button>
           ${imdbLink(show, 'btn small')}
-          <button type="button" class="btn small" data-open="${esc(show.id)}">${esc(T('details'))}</button>
         </div>
       </div>
     </section>`;
@@ -819,7 +850,7 @@ function nextUpHTML() {
           <span class="row-main">
             <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
             ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-            <span class="card-meta">${metaParts(show)}</span>
+            ${metaHTML(show)}
           </span>
         </button>
         <div class="trow-actions">
@@ -912,10 +943,13 @@ function startWatching(id) {
   });
 }
 
+const BACKUP_DUE_MS = 30 * 24 * 60 * 60 * 1000;
+const backupDue = () => !state.lastBackup || Date.now() - state.lastBackup > BACKUP_DUE_MS;
+
 function renderNav() {
   const tabs = [
     { page: 'today', label: T('navToday'), ic: 'sun' },
-    { page: 'next', label: T('navNext'), ic: 'dice' },
+    { page: 'next', label: T('navNext'), ic: 'queue' },
     { page: 'fav', label: T('navFav'), ic: 'star' },
     { page: 'all', label: T('navAll'), ic: 'library' },
   ];
@@ -924,10 +958,27 @@ function renderNav() {
       ${icon(t.ic)}<span>${esc(t.label)}</span>
     </button>`).join('');
   $('#libraryTools').hidden = state.page !== 'all' || !!query;
+  const sb = $('#settingsBtn');
+  sb.classList.toggle('has-dot', backupDue());
+  sb.setAttribute('aria-label', backupDue() ? `${T('settings')} (${T('backupNeeded')})` : T('settings'));
   const v = viewOf(query ? 'all' : state.page);
   const vt = $('#viewToggle');
   vt.innerHTML = icon(v === 'grid' ? 'list' : 'grid');
   vt.setAttribute('aria-label', v === 'grid' ? T('viewList') : T('viewGrid'));
+}
+
+// Show the swipe gesture once: nudge the first item and a short tip.
+function maybeSwipeHint() {
+  if (state.swipeHintShown || layers.length) return;
+  const item = document.querySelector('#list .trow, #list .row, #list .card');
+  if (!item) return;
+  state.swipeHintShown = true;
+  save();
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    item.classList.add('nudge');
+    setTimeout(() => item.classList.remove('nudge'), 1200);
+  }
+  toast(T('swipeHint'), 6000);
 }
 
 function renderList() {
@@ -955,7 +1006,9 @@ function groupedHTML(visible, view) {
 
 function renderFav(list) {
   const favs = sortShows(state.shows.filter((s) => s.favorite));
-  list.innerHTML = favs.length ? groupedHTML(favs) : emptyHTML(T('favEmptyTitle'), T('favEmpty'));
+  if (!favs.length) { list.innerHTML = emptyHTML(T('favEmptyTitle'), T('favEmpty')); return; }
+  // A handful of favorites reads better as one list than as many one-item groups.
+  list.innerHTML = favs.length < 12 ? itemsHTML(favs) : groupedHTML(favs);
 }
 
 // Search runs over every series, whatever page is open.
@@ -1045,7 +1098,17 @@ function openMoveMenu(id, anchor) {
   // Place it at the swiped item's height, on the side the item was swiped towards.
   const r = anchor || { top: innerHeight / 3, bottom: innerHeight / 3 };
   const h = body.offsetHeight;
-  const top = Math.max(8, Math.min(r.top, innerHeight - h - 8));
+  const below = innerHeight - r.bottom - 12;
+  const above = r.top - 12;
+  let top;
+  if (h <= below) top = r.bottom + 4;
+  else if (h <= above) top = r.top - h - 4;
+  else if (Math.max(below, above) >= 220) {
+    // Neither side fits: use the roomier side and let the menu scroll.
+    const room = Math.max(below, above);
+    body.style.maxHeight = `${room}px`;
+    top = below >= above ? r.bottom + 4 : r.top - room - 4;
+  } else top = Math.max(8, Math.min(r.top, innerHeight - h - 8));
   body.style.top = `${top}px`;
   body.style.left = '12px';
   body.querySelector('[aria-current="true"]')?.focus({ preventScroll: true });
@@ -1064,17 +1127,45 @@ function initSwipe() {
     el.style.opacity = '';
   };
 
+  const EDGE = 24; // leave the screen edges to Android's back gesture
+  let swallowUntil = 0;
+  document.addEventListener('click', (e) => {
+    if (Date.now() < swallowUntil) { swallowUntil = 0; e.preventDefault(); e.stopPropagation(); }
+  }, true);
+  const LONG_PRESS_MS = 450;
+  let pressTimer = null;
+  const cancelPress = () => { clearTimeout(pressTimer); pressTimer = null; };
+
   list.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     const item = e.target.closest('.card, .row, .trow');
     const open = item && item.querySelector('[data-open]');
     if (!open) return;
-    drag = { item, id: open.dataset.open, x: e.clientX, y: e.clientY, dx: 0, mode: null, pointerId: e.pointerId };
+    const nearEdge = e.clientX < EDGE || e.clientX > innerWidth - EDGE;
+    drag = { item, id: open.dataset.open, x: e.clientX, y: e.clientY, dx: 0, mode: nearEdge ? 'none' : null, pointerId: e.pointerId };
+    // Long-press opens the same menu (works anywhere on the item, edges included).
+    cancelPress();
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      if (!drag || drag.mode === 'swipe') return;
+      const { id } = drag;
+      drag = null;
+      // Lifting the finger after a long-press fires a click on whatever is under it now
+      // (the menu's backdrop). Swallow that one click so the menu stays open.
+      document.addEventListener('pointerup', () => { swallowUntil = Date.now() + 600; }, { once: true, capture: true });
+      if (navigator.vibrate) { try { navigator.vibrate(12); } catch (err) { /* ignore */ } }
+      openMoveMenu(id, item.getBoundingClientRect());
+    }, LONG_PRESS_MS);
+  });
+  list.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.card, .row, .trow')) e.preventDefault();
   });
   list.addEventListener('pointermove', (e) => {
     if (!drag || e.pointerId !== drag.pointerId) return;
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) cancelPress();
+    if (drag.mode === 'none') return;
     if (!drag.mode) {
       if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
       if (dx < -12 && Math.abs(dx) > Math.abs(dy) * 1.5) {
@@ -1088,10 +1179,12 @@ function initSwipe() {
     drag.item.style.opacity = String(1 - Math.min(0.45, -drag.dx / 300));
   });
   const end = (e) => {
+    cancelPress();
     if (!drag || (e && e.pointerId !== drag.pointerId)) return;
     const { item, id, mode, dx } = drag;
     drag = null;
     if (mode !== 'swipe') return;
+    if (!state.swipeHintShown) { state.swipeHintShown = true; save(); }
     suppressClick = true;
     setTimeout(() => { suppressClick = false; }, 400);
     reset(item);
@@ -1099,7 +1192,8 @@ function initSwipe() {
   };
   list.addEventListener('pointerup', end);
   list.addEventListener('pointercancel', (e) => {
-    if (drag && drag.mode) reset(drag.item);
+    cancelPress();
+    if (drag && drag.mode === 'swipe') reset(drag.item);
     drag = null;
   });
   // A swipe must not also count as a tap on the card.
@@ -1308,6 +1402,11 @@ function openEditor(id) {
   const layer = sheetShell(isNew ? T('addSeries') : primaryTitle(show));
   const sheet = $('.sheet', layer);
   const body = $('.sheet-body', layer);
+  if (!isNew) {
+    const x = $('.sheet-head [data-close]', layer);
+    x.className = 'btn small primary';
+    x.textContent = T('done');
+  }
   if (isNew) {
     sheet.appendChild(el(`<div class="sheet-foot">
       <button type="button" class="btn grow" data-close>${esc(T('cancel'))}</button>
@@ -1315,12 +1414,21 @@ function openEditor(id) {
   }
 
   body.innerHTML = `
-    <div data-watch-top></div>
     <div class="field">
       <label for="fTitle">${esc(T('title'))}</label>
       <input id="fTitle" class="input" dir="auto" autocomplete="off" enterkeyhint="done" value="${esc(show.title)}">
       <div data-dup></div>
       <div data-suggest class="results"></div>
+    </div>
+    <div class="two">
+      <div class="field">
+        <label for="fStatus">${esc(T('status'))}</label>
+        <select id="fStatus" class="select" data-statuses></select>
+      </div>
+      <div class="field">
+        <label for="fPlatform">${esc(T('platform'))}</label>
+        <select id="fPlatform" class="select" data-platforms></select>
+      </div>
     </div>
     <div class="field">
       <span class="label">${esc(T('image'))}</span>
@@ -1341,24 +1449,15 @@ function openEditor(id) {
       <div data-linked class="hint"></div>
       <input type="file" id="fImgFile" accept="image/*" hidden>
     </div>
-    <div class="two">
-      <div class="field">
-        <label for="fStatus">${esc(T('status'))}</label>
-        <select id="fStatus" class="select" data-statuses></select>
-      </div>
-      <div class="field">
-        <label for="fPlatform">${esc(T('platform'))}</label>
-        <select id="fPlatform" class="select" data-platforms></select>
-      </div>
-    </div>
+    <div data-watch-top></div>
     <div class="two">
       <div class="field">
         <label for="fSeason">${esc(T('season'))}</label>
-        <input id="fSeason" class="input" type="number" inputmode="numeric" min="1" max="99" value="${show.season ?? ''}">
+        <input id="fSeason" class="input" type="number" inputmode="numeric" min="1" max="99" placeholder="1" value="${show.season ?? ''}">
       </div>
       <div class="field">
         <span class="label">${esc(T('favorite'))}</span>
-        <div class="toggle-row compact-toggle">
+        <div class="toggle-row compact-toggle" data-fav-row>
           <span style="color:var(--star);display:inline-flex">${icon('star')}</span>
           <button type="button" class="switch" role="switch" id="fFav" aria-checked="${show.favorite}" aria-label="${esc(T('favorite'))}"></button>
         </div>
@@ -1447,7 +1546,7 @@ function openEditor(id) {
     const q = searchQueryFor(show).trim();
     if (show.imdb) parts.push(linkBtn(imdbUrl(show.imdb), esc(T('imdb')), 'btn imdb-btn'));
     else if (q) {
-      parts.push(`<button type="button" class="btn" data-imdb-find>${icon('search')}${esc(T('imdbFind'))}</button>`);
+      parts.push(`<button type="button" class="btn nowrap" data-imdb-find>${icon('search')}<bdi>${esc(T('imdbFind'))}</bdi></button>`);
       parts.push(linkBtn(googleImdbUrl(q), esc(T('googleSearch')), 'btn'));
     }
     box.className = parts.length ? 'btn-row top-actions' : '';
@@ -1584,9 +1683,9 @@ function openEditor(id) {
     touch();
     if (!isNew) toast(T('movedTo', statusLabel(statusById(show.status))));
   });
-  $('#fFav', body).addEventListener('click', (e) => {
+  $('[data-fav-row]', body).addEventListener('click', () => {
     show.favorite = !show.favorite;
-    e.currentTarget.setAttribute('aria-checked', show.favorite);
+    $('#fFav', body).setAttribute('aria-checked', show.favorite);
     touch();
   });
   $('#fCheck', body).addEventListener('click', (e) => {
@@ -1660,6 +1759,7 @@ function openEditor(id) {
       show.createdAt = show.updatedAt = Date.now();
       state.shows.push(show);
       if (!save()) { state.shows.pop(); return; }
+      addedNow = true;
       renderList();
       closeTop();
       toast(T('added'));
@@ -1677,7 +1777,12 @@ function openEditor(id) {
     });
   }
 
-  openLayer(layer, () => { if (suggestCtrl) suggestCtrl.abort(); if (dirty) renderList(); });
+  let addedNow = false;
+  const hasInput = () => isNew && !addedNow && !!(show.title.trim() || show.image || show.watchUrl || show.note.trim());
+  openLayer(layer, () => {
+    if (suggestCtrl) suggestCtrl.abort();
+    if (dirty) { renderList(); toast(T('saved')); }
+  }, hasInput);
   wireClose(layer);
   if (isNew) setTimeout(() => $('#fTitle', body).focus(), 120);
 }
@@ -1701,6 +1806,19 @@ function openSettings() {
         </div>
       </section>
       <section class="section">
+        <h3>${esc(T('backup'))}</h3>
+        ${backupDue()
+          ? `<span class="backup-warn">${esc(state.lastBackup ? T('backupDue') : T('neverBackedUp'))}</span>`
+          : `<span class="hint"><strong>${esc(T('lastBackup', fmtDate(state.lastBackup)))}</strong></span>`}
+        <span class="hint">${esc(T('backupHint'))}</span>
+        <div class="btn-row">
+          <button type="button" class="btn grow" data-export>${icon('download')}${esc(T('exportFile'))}</button>
+          ${canShare ? `<button type="button" class="btn grow" data-share>${icon('share')}${esc(T('shareFile'))}</button>` : ''}
+        </div>
+        <button type="button" class="btn" data-import>${icon('upload')}${esc(T('importFile'))}</button>
+        <input type="file" id="importInput" accept="application/json,.json" hidden>
+      </section>
+      <section class="section">
         <h3>${esc(T('design'))}</h3>
         <div class="design-list">
           ${DESIGNS.map((d) => {
@@ -1715,8 +1833,9 @@ function openSettings() {
       <section class="section">
         <h3>${esc(T('theme'))}</h3>
         <div class="seg" data-seg="theme">
-          ${['system', 'light', 'dark'].map((v) => `<button type="button" data-val="${v}" aria-pressed="${state.theme === v}">${esc(T('theme' + v[0].toUpperCase() + v.slice(1)))}</button>`).join('')}
+          ${['system', 'light', 'dark'].map((v) => `<button type="button" data-val="${v}" aria-pressed="${state.theme === v}" ${state.design === 'cinema' ? 'disabled' : ''}>${esc(T('theme' + v[0].toUpperCase() + v.slice(1)))}</button>`).join('')}
         </div>
+        ${state.design === 'cinema' ? `<span class="hint">${esc(T('cinemaAlwaysDark'))}</span>` : ''}
       </section>
       <section class="section">
         <h3>${esc(T('platforms'))}</h3>
@@ -1733,17 +1852,6 @@ function openSettings() {
       <section class="section">
         <h3>${esc(T('posters'))}</h3>
         <button type="button" class="btn" data-fill ${missing ? '' : 'disabled'}>${icon('image')}${esc(missing ? T('fillMissing', missing) : T('noMissing'))}</button>
-      </section>
-      <section class="section">
-        <h3>${esc(T('backup'))}</h3>
-        <span class="hint">${esc(T('backupHint'))}</span>
-        <span class="hint"><strong>${esc(state.lastBackup ? T('lastBackup', fmtDate(state.lastBackup)) : T('neverBackedUp'))}</strong></span>
-        <div class="btn-row">
-          <button type="button" class="btn grow" data-export>${icon('download')}${esc(T('exportFile'))}</button>
-          ${canShare ? `<button type="button" class="btn grow" data-share>${icon('share')}${esc(T('shareFile'))}</button>` : ''}
-        </div>
-        <button type="button" class="btn" data-import>${icon('upload')}${esc(T('importFile'))}</button>
-        <input type="file" id="importInput" accept="application/json,.json" hidden>
       </section>
       <section class="section">
         <h3>${esc(T('about'))}</h3>
@@ -1769,24 +1877,19 @@ function openSettings() {
       const n = state.shows.filter((s) => s.status === st.id).length;
       return `
         <div class="cat-row" data-cat="${esc(st.id)}">
-          <input type="color" value="${st.color}" data-color aria-label="color">
-          <div class="cat-names">
+          <div class="cat-line">
+            <input type="color" value="${st.color}" data-color aria-label="color">
             <input class="input" dir="rtl" data-he value="${esc(st.he)}" placeholder="${esc(T('nameHe'))}" aria-label="${esc(T('nameHe'))}">
             <input class="input" dir="ltr" data-en value="${esc(st.en)}" placeholder="${esc(T('nameEn'))}" aria-label="${esc(T('nameEn'))}">
           </div>
-          <div class="cat-tools">
-            <button type="button" class="icon-btn" data-move="-1" aria-label="${esc(T('moveUp'))}" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button>
-            <button type="button" class="icon-btn" data-move="1" aria-label="${esc(T('moveDown'))}" ${i === state.statuses.length - 1 ? 'disabled' : ''}>${icon('down')}</button>
-          </div>
-          <label class="cat-page">
-            <span class="hint">${esc(T('categoryPage'))}</span>
-            <select class="select" data-cat-page>
+          <div class="cat-line">
+            <select class="select" data-cat-page aria-label="${esc(T('categoryPage'))}">
               ${[['today', 'pageToday'], ['next', 'pageNext'], ['', 'pageNone']].map(([v, k]) => `<option value="${v}" ${st.page === v ? 'selected' : ''}>${esc(T(k))}</option>`).join('')}
             </select>
-          </label>
-          <div class="cat-foot">
-            <span>${esc(countLabel(n))}</span>
-            <button type="button" class="btn small danger" data-del-cat>${icon('trash')}${esc(T('deleteCategory'))}</button>
+            <span class="hint cat-count">${esc(countLabel(n))}</span>
+            <button type="button" class="icon-btn" data-move="-1" aria-label="${esc(T('moveUp'))}" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button>
+            <button type="button" class="icon-btn" data-move="1" aria-label="${esc(T('moveDown'))}" ${i === state.statuses.length - 1 ? 'disabled' : ''}>${icon('down')}</button>
+            <button type="button" class="icon-btn danger-icon" data-del-cat aria-label="${esc(T('deleteCategory'))}">${icon('trash')}</button>
           </div>
         </div>`;
     }).join('');
@@ -1902,7 +2005,7 @@ function openSettings() {
     const ok = await confirmBox(T('importConfirm', state.shows.length, data.shows.length), T('replace'), { danger: true });
     if (!ok) return;
     // Keep this phone's display preferences.
-    Object.assign(data, { lang: state.lang, theme: state.theme, view: state.view, sort: state.sort, tab: 'all', lastBackup: state.lastBackup });
+    Object.assign(data, { lang: state.lang, theme: state.theme, design: state.design, views: state.views, view: state.view, sort: state.sort, tab: 'all', lastBackup: state.lastBackup, swipeHintShown: state.swipeHintShown });
     state = data;
     save(); applyPrefs(); renderList(); render();
     toast(T('imported'));
@@ -1965,6 +2068,7 @@ function backupFile() {
 function markBackedUp() {
   state.lastBackup = Date.now();
   save();
+  renderNav();
 }
 function exportBackup() {
   const file = backupFile();
@@ -2050,6 +2154,7 @@ function init() {
   $('#searchClose').addEventListener('click', closeSearch);
   $('#searchInput').addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearch(); });
   $('#settingsBtn').addEventListener('click', openSettings);
+  setTimeout(maybeSwipeHint, 900);
   $('#addBtn').addEventListener('click', () => openEditor(null));
 
   // Ask the browser not to evict our data under storage pressure.

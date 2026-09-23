@@ -939,3 +939,17 @@ body { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
 .image-edit .btn-row:only-child { flex-direction: row; flex-wrap: wrap; }
 .hero { flex: none; }
 .hero-poster .poster { flex: none; }
+
+/* Long-press must not start text selection or the copy menu */
+.card, .row, .trow, .pop, .pop * {
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+}
+/* Category menu: wider and centered */
+.pop {
+  width: min(360px, calc(100vw - 32px));
+  scrollbar-width: none;
+}
+.pop::-webkit-scrollbar { display: none; }
+.pop-title { text-align: center; font-size: 13px; padding: 8px 10px 6px; }
+.pop-opt { min-height: 46px; font-size: 16px; padding: 0 14px; }

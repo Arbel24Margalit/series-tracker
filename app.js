@@ -1052,8 +1052,9 @@ async function updateLinkFromClipboard(show) {
   toast(T('linkUpdated'), 5000, { label: T('undo'), fn: () => { Object.assign(show, prev); save(); renderList(); } });
 }
 
-// A small popup menu next to the swiped series.
-function openMoveMenu(id, anchor) {
+// The category menu for a series (opened by swipe or long-press).
+function openMoveMenu(id) {
+  try { window.getSelection().removeAllRanges(); } catch (e) { /* ignore */ }
   const show = state.shows.find((s) => s.id === id);
   if (!show) return;
   const isCandidate = statusesForPage('next').some((c) => c.id === show.status);
@@ -1095,22 +1096,11 @@ function openMoveMenu(id, anchor) {
     }
   });
   openLayer(layer);
-  // Place it at the swiped item's height, on the side the item was swiped towards.
-  const r = anchor || { top: innerHeight / 3, bottom: innerHeight / 3 };
+  // Centered on the screen; scrolls inside when there are many categories.
+  body.style.maxHeight = `${innerHeight - 32}px`;
   const h = body.offsetHeight;
-  const below = innerHeight - r.bottom - 12;
-  const above = r.top - 12;
-  let top;
-  if (h <= below) top = r.bottom + 4;
-  else if (h <= above) top = r.top - h - 4;
-  else if (Math.max(below, above) >= 220) {
-    // Neither side fits: use the roomier side and let the menu scroll.
-    const room = Math.max(below, above);
-    body.style.maxHeight = `${room}px`;
-    top = below >= above ? r.bottom + 4 : r.top - room - 4;
-  } else top = Math.max(8, Math.min(r.top, innerHeight - h - 8));
-  body.style.top = `${top}px`;
-  body.style.left = '12px';
+  body.style.top = `${Math.max(16, Math.round((innerHeight - h) / 2))}px`;
+  body.style.left = `${Math.round((innerWidth - body.offsetWidth) / 2)}px`;
   body.querySelector('[aria-current="true"]')?.focus({ preventScroll: true });
 }
 
@@ -1154,7 +1144,7 @@ function initSwipe() {
       // (the menu's backdrop). Swallow that one click so the menu stays open.
       document.addEventListener('pointerup', () => { swallowUntil = Date.now() + 600; }, { once: true, capture: true });
       if (navigator.vibrate) { try { navigator.vibrate(12); } catch (err) { /* ignore */ } }
-      openMoveMenu(id, item.getBoundingClientRect());
+      openMoveMenu(id);
     }, LONG_PRESS_MS);
   });
   list.addEventListener('contextmenu', (e) => {
@@ -1188,7 +1178,7 @@ function initSwipe() {
     suppressClick = true;
     setTimeout(() => { suppressClick = false; }, 400);
     reset(item);
-    if (dx <= -THRESHOLD) openMoveMenu(id, item.getBoundingClientRect());
+    if (dx <= -THRESHOLD) openMoveMenu(id);
   };
   list.addEventListener('pointerup', end);
   list.addEventListener('pointercancel', (e) => {

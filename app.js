@@ -28,7 +28,10 @@ const DEFAULT_PLATFORMS = ['FlixHQ', 'Netflix', 'Apple TV (מחשב)', 'YouTube'
 const DEFAULT_PAGES = { watching: 'today', paused: 'today', upnext: 'next', maybe: 'next', retry: 'next', rewatch: 'next' };
 const SCHEMA_VERSION = 2;
 const PAGES = ['today', 'next', 'fav', 'all'];
-const DESIGNS = ['classic', 'cinema', 'compact'];
+const DESIGNS = ['classic', 'cinema', 'compact', 'cinema-compact'];
+const DESIGN_KEYS = { classic: 'Classic', cinema: 'Cinema', compact: 'Compact', 'cinema-compact': 'CinemaCompact' };
+// "cinema-compact" = the Cinema palette with Compact density (both CSS selectors apply).
+const isCinema = () => state.design.startsWith('cinema');
 const DEFAULT_VIEWS = { today: 'list', next: 'list', fav: 'grid', all: 'grid' };
 
 /* ---------- Strings ---------- */
@@ -61,7 +64,7 @@ const STRINGS = {
     emptySearch: 'לא נמצאה סדרה בשם "{0}".',
     seasonShort: 'עונה {0}', flag: 'לבדיקה',
     language: 'שפה', theme: 'ערכת צבעים', themeSystem: 'לפי המכשיר', themeLight: 'בהירה', themeDark: 'כהה',
-    cinemaAlwaysDark: 'בעיצוב "קולנוע" הערכה תמיד כהה.',
+    cinemaAlwaysDark: 'בעיצובי "קולנוע" הערכה תמיד כהה.',
     categories: 'קטגוריות', categoriesHint: 'שם, צבע, סדר והדף שבו הקטגוריה מופיעה. השינויים נשמרים מיד.',
     nameHe: 'שם בעברית', nameEn: 'שם באנגלית', addCategory: 'הוספת קטגוריה', unnamed: 'ללא שם',
     seriesCount: '{0} סדרות', oneSeries: 'סדרה אחת', noSeries: 'אין סדרות',
@@ -86,15 +89,16 @@ const STRINGS = {
     designClassicHint: 'המראה הרגיל: כרטיסים עם צל ורווחים נוחים.',
     designCinemaHint: 'תמיד כהה, פוסטרים גדולים בשני טורים ותפריט צף.',
     designCompactHint: 'הרבה סדרות במסך אחד: שורות צפופות ותמונות קטנות.',
+    designCinemaCompact: 'קולנוע צפוף', designCinemaCompactHint: 'הצבעים הכהים של "קולנוע" עם הצפיפות של "צפוף".',
     upNextTitle: 'הסדרה הבאה', noNextTitle: 'עוד לא נבחרה סדרה הבאה', noNext: 'אפשר לבחור אותה בדף "הבא בתור".',
     chooseNext: 'לבחירה', changeNext: 'החלפה', setNext: 'לסמן כבאה', unsetNext: 'מסומנת כבאה ✓',
-    nextSet: '"{0}" סומנה כסדרה הבאה', nextCleared: 'הסימון כסדרה הבאה הוסר', resume: 'חזרה לצפייה',
+    nextSet: '"{0}" סומנה כסדרה הבאה', nextCleared: 'הסימון כסדרה הבאה הוסר',
     todayEmptyTitle: 'אין כרגע סדרה בצפייה', todayEmpty: 'אפשר לבחור מה להתחיל בדף "הבא בתור".',
     nextEmptyTitle: 'אין מועמדות', nextEmpty: 'אין סדרות בקטגוריות של "הבא בתור".',
     favEmptyTitle: 'עוד אין מועדפים', favEmpty: 'לחיצה על הכוכב בכרטיס של סדרה מוסיפה אותה לכאן.',
     unknownPlatform: 'לא ידוע',
-    pickForMe: 'בחירה אקראית', pickAgain: 'הצעה אחרת', startWatching: 'התחלתי לראות', details: 'פרטים',
-    started: 'הועברה ל"{0}"', undo: 'ביטול', yourPick: 'ההצעה:',
+    pickForMe: 'בחירה אקראית', pickAgain: 'הצעה אחרת', details: 'פרטים',
+    undo: 'ביטול', yourPick: 'ההצעה:',
     imdb: 'IMDb', imdbField: 'קישור ל-IMDb', imdbHint: 'מתמלא לבד כשבוחרים התאמה מ-TVmaze, ואפשר גם להדביק כאן קישור.',
     badImdb: 'צריך קישור לדף של סדרה ב-IMDb.', imdbFind: 'מציאה ב-IMDb', googleSearch: 'חיפוש בגוגל',
     imdbFound: 'הקישור ל-IMDb נשמר', imdbNotFound: 'ל-TVmaze אין קישור ל-IMDb עבור הסדרה הזו. אפשר לנסות "חיפוש בגוגל" או להדביק קישור.',
@@ -157,14 +161,15 @@ const STRINGS = {
     designClassicHint: 'The standard look: shadowed cards and comfortable spacing.',
     designCinemaHint: 'Always dark, large posters in two columns, floating menu.',
     designCompactHint: 'Many series per screen: dense rows and small thumbnails.',
+    designCinemaCompact: 'Cinema compact', designCinemaCompactHint: 'The dark Cinema colors with Compact density.',
     upNextTitle: 'Next series', noNextTitle: 'No next series chosen yet', noNext: 'Choose one on the “Up next” page.',
     chooseNext: 'Choose', changeNext: 'Change', setNext: 'Mark as next', unsetNext: 'Marked as next ✓',
-    nextSet: '“{0}” is the next series', nextCleared: 'No longer marked as next', resume: 'Resume',
+    nextSet: '“{0}” is the next series', nextCleared: 'No longer marked as next',
     todayEmptyTitle: 'Nothing in progress', todayEmpty: 'Pick what to start on the “Up next” page.',
     nextEmptyTitle: 'No candidates', nextEmpty: 'No series in the “Up next” categories.',
     favEmptyTitle: 'No favorites yet', favEmpty: 'Tap the star on a series card to add it here.', unknownPlatform: 'Unknown',
-    pickForMe: 'Random pick', pickAgain: 'Another one', startWatching: 'Started watching', details: 'Details',
-    started: 'Moved to “{0}”', undo: 'Undo', yourPick: 'How about:',
+    pickForMe: 'Random pick', pickAgain: 'Another one', details: 'Details',
+    undo: 'Undo', yourPick: 'How about:',
     imdb: 'IMDb', imdbField: 'IMDb link', imdbHint: 'Filled in automatically when you pick a TVmaze match. You can also paste an IMDb link.',
     badImdb: 'Needs an IMDb series link (contains /title/tt…).', imdbFind: 'Find on IMDb', googleSearch: 'Search Google',
     imdbFound: 'IMDb link saved', imdbNotFound: 'TVmaze has no IMDb link for this series. Try “Search Google” or paste a link.',
@@ -172,7 +177,7 @@ const STRINGS = {
     addPlatform: 'Add platform', platformName: 'Platform name',
     deletePlatformConfirm: 'Delete “{0}”? {1} series will move to “Unknown”.',
     categoryPage: 'Shows on page', pageToday: 'Today', pageNext: 'Up next', pageNone: 'Only in “All”',
-    done: 'Done', cinemaAlwaysDark: 'The Cinema design is always dark.',
+    done: 'Done', cinemaAlwaysDark: 'The Cinema designs are always dark.',
     backupDue: 'No backup for over a month', backupNeeded: 'A backup is recommended',
     discardTitle: 'Discard this series?', discardBody: 'What you typed won’t be saved.', discard: 'Discard', keepEditing: 'Keep editing',
     swipeHint: 'Tip: swipe a series left, or long-press it, to move it to another category.',
@@ -579,7 +584,7 @@ function applyPrefs() {
   root.dir = state.lang === 'he' ? 'rtl' : 'ltr';
   if (state.theme === 'system') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', state.theme);
-  root.setAttribute('data-design', state.design);
+  root.setAttribute('data-design', state.design.replace('-', ' '));
   document.title = T('appName');
   $('#brandText').textContent = T('appName');
   $('#addBtnText').textContent = T('addSeries');
@@ -599,7 +604,7 @@ function applyPrefs() {
   $('.search-icon').innerHTML = icon('search');
   const meta = document.querySelector('meta[name="theme-color"]:not([media])');
   if (meta) meta.remove();
-  if (state.design === 'cinema') {
+  if (isCinema()) {
     const m = document.createElement('meta');
     m.name = 'theme-color'; m.content = '#0c0b10';
     document.head.appendChild(m);
@@ -717,21 +722,25 @@ function cardHTML(show) {
       ${favBtn(show)}
     </div>`;
 }
-function rowHTML(show) {
+// One row layout everywhere: poster, titles and details, then ▶ (when there is a
+// link to open) and the favorite star.
+function rowCore(show, cls, { flag = true, actions = null } = {}) {
   const sec = secondaryTitle(show);
   return `
-    <div class="row">
+    <div class="${cls}">
       <button type="button" class="row-open" data-open="${esc(show.id)}">
         ${posterHTML(show)}
         <span class="row-main">
           <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
           ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-          ${metaHTML(show, show.needsCheck ? `<span class="pill-flag">${esc(T('flag'))}</span>` : '')}
+          ${metaHTML(show, flag && show.needsCheck ? `<span class="pill-flag">${esc(T('flag'))}</span>` : '')}
         </span>
       </button>
-      ${watchBtn(show, 'row-play')}
-      ${favBtn(show)}
+      ${actions !== null ? actions : `${watchBtn(show, 'row-play watch-now')}${favBtn(show)}`}
     </div>`;
+}
+function rowHTML(show) {
+  return rowCore(show, 'row');
 }
 
 /* ---------- Pages ---------- */
@@ -750,48 +759,18 @@ function emptyHTML(title, body, extra = '') {
   return `<div class="empty"><strong>${esc(title)}</strong>${esc(body)}${extra}</div>`;
 }
 
-function todayRowHTML(show, { resume = false } = {}) {
-  const sec = secondaryTitle(show);
-  const target = watchTarget(show);
-  const watch = (target
-    ? `<a class="icon-start watch-now" href="${esc(target.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(watchLabel(show, target))}" title="${esc(watchLabel(show, target))}">${icon('play')}</a>`
-    : '') + (resume ? `<button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${esc(T('resume'))}</button>` : '');
-  return `
-    <div class="trow">
-      <button type="button" class="row-open" data-open="${esc(show.id)}">
-        ${posterHTML(show)}
-        <span class="row-main">
-          <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
-          ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-          ${metaHTML(show)}
-        </span>
-      </button>
-      ${watch ? `<div class="trow-actions">${watch}</div>` : ''}
-    </div>`;
+function todayRowHTML(show) {
+  return rowCore(show, 'trow');
 }
 
 const viewOf = (page) => (state.views && state.views[page]) || DEFAULT_VIEWS[page];
 
 function candidateRowHTML(show) {
-  const sec = secondaryTitle(show);
-  return `
-    <div class="trow${state.nextId === show.id ? ' is-next' : ''}">
-      <button type="button" class="row-open" data-open="${esc(show.id)}">
-        ${posterHTML(show)}
-        <span class="row-main">
-          <span class="row-title"><bdi>${esc(primaryTitle(show))}</bdi></span>
-          ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
-          ${metaHTML(show)}
-        </span>
-      </button>
-      ${state.nextId === show.id ? `
-      <div class="trow-actions">
-        <button type="button" class="btn small start-btn" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
-        ${nextToggleHTML(show)}
-        ${imdbLink(show, 'btn small')}
-      </div>` : `
-      <button type="button" class="icon-start" data-start="${esc(show.id)}" aria-label="${esc(T('startWatching'))}">${icon('play')}</button>`}
-    </div>`;
+  if (state.nextId !== show.id) return rowCore(show, 'trow');
+  // The marked next series carries its own buttons on a second line.
+  return rowCore(show, 'trow is-next', {
+    actions: `<div class="trow-actions">${nextToggleHTML(show)}${imdbLink(show, 'btn small')}</div>`,
+  });
 }
 
 function pickCardHTML(show) {
@@ -806,7 +785,6 @@ function pickCardHTML(show) {
         ${sec ? `<span class="card-sub"><bdi>${esc(sec)}</bdi></span>` : ''}
         <span class="card-meta"><span class="dot" style="--c:${st ? st.color : '#7d8196'}"></span>${esc(statusLabel(st))}${metaParts(show) ? ' · ' + metaParts(show) : ''}</span>
         <div class="btn-row">
-          <button type="button" class="btn primary small" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
           ${nextToggleHTML(show)}
           <button type="button" class="btn small" data-pick-again>${icon('dice')}${esc(T('pickAgain'))}</button>
           ${imdbLink(show, 'btn small')}
@@ -854,7 +832,6 @@ function nextUpHTML() {
           </span>
         </button>
         <div class="trow-actions">
-          <button type="button" class="btn primary small" data-start="${esc(show.id)}">${icon('play')}${esc(T('startWatching'))}</button>
           <button type="button" class="btn small" data-goto="next">${esc(T('changeNext'))}</button>
           ${imdbLink(show, 'btn small')}
         </div>
@@ -871,16 +848,16 @@ function renderToday(list) {
   const pool = state.shows.filter((s) => cats.some((c) => c.id === s.status));
   const grid = viewOf('today') === 'grid';
   const [first, ...rest] = cats;
-  const group = (st, opts) => {
+  const group = (st) => {
     const g = pool.filter((s) => s.status === st.id).sort((a, b) => b.updatedAt - a.updatedAt);
     if (!g.length) return '';
     const items = grid
       ? `<div class="grid">${g.map(cardHTML).join('')}</div>`
-      : `<div class="rows">${g.map((s) => todayRowHTML(s, opts)).join('')}</div>`;
+      : `<div class="rows">${g.map(todayRowHTML).join('')}</div>`;
     return `<section class="group">${groupHead(st, g.length)}${items}</section>`;
   };
   const current = first ? group(first) : '';
-  const others = rest.map((st) => group(st, { resume: true })).join('');
+  const others = rest.map((st) => group(st)).join('');
   const empty = pool.length ? '' : emptyHTML(T('todayEmptyTitle'), T('todayEmpty'));
   // Order: in progress, on hold, and the chosen next series at the bottom.
   list.innerHTML = empty + current + others + nextUpHTML();
@@ -923,24 +900,6 @@ function pickRandom() {
   nextPick = others[Math.floor(Math.random() * others.length)].id;
   renderList();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function startWatching(id) {
-  const show = state.shows.find((s) => s.id === id);
-  const target = statusesForPage('today')[0] || statusById('watching') || state.statuses[0];
-  if (!show || !target) return;
-  const prev = { status: show.status, updatedAt: show.updatedAt };
-  const prevNext = state.nextId;
-  show.status = target.id;
-  show.updatedAt = Date.now();
-  if (nextPick === id) nextPick = null;
-  if (state.nextId === id) state.nextId = null;
-  save();
-  renderList();
-  toast(T('started', statusLabel(target)), 5000, {
-    label: T('undo'),
-    fn: () => { Object.assign(show, prev); state.nextId = prevNext; save(); renderList(); },
-  });
 }
 
 const BACKUP_DUE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -1822,7 +1781,7 @@ function openSettings() {
         <h3>${esc(T('design'))}</h3>
         <div class="design-list">
           ${DESIGNS.map((d) => {
-            const k = d[0].toUpperCase() + d.slice(1);
+            const k = DESIGN_KEYS[d];
             return `<button type="button" class="design-opt" data-design-opt="${d}" aria-pressed="${state.design === d}">
               <span class="design-swatch design-swatch-${d}" aria-hidden="true"><i></i><i></i><i></i></span>
               <span><strong>${esc(T('design' + k))}</strong><span class="hint">${esc(T('design' + k + 'Hint'))}</span></span>
@@ -1833,9 +1792,9 @@ function openSettings() {
       <section class="section">
         <h3>${esc(T('theme'))}</h3>
         <div class="seg" data-seg="theme">
-          ${['system', 'light', 'dark'].map((v) => `<button type="button" data-val="${v}" aria-pressed="${state.theme === v}" ${state.design === 'cinema' ? 'disabled' : ''}>${esc(T('theme' + v[0].toUpperCase() + v.slice(1)))}</button>`).join('')}
+          ${['system', 'light', 'dark'].map((v) => `<button type="button" data-val="${v}" aria-pressed="${state.theme === v}" ${isCinema() ? 'disabled' : ''}>${esc(T('theme' + v[0].toUpperCase() + v.slice(1)))}</button>`).join('')}
         </div>
-        ${state.design === 'cinema' ? `<span class="hint">${esc(T('cinemaAlwaysDark'))}</span>` : ''}
+        ${isCinema() ? `<span class="hint">${esc(T('cinemaAlwaysDark'))}</span>` : ''}
       </section>
       <section class="section">
         <h3>${esc(T('platforms'))}</h3>
@@ -2117,8 +2076,6 @@ function init() {
   $('#list').addEventListener('click', (e) => {
     const fav = e.target.closest('[data-fav]');
     if (fav) { toggleFavorite(fav.dataset.fav); return; }
-    const start = e.target.closest('[data-start]');
-    if (start) { startWatching(start.dataset.start); return; }
     const pin = e.target.closest('[data-set-next]');
     if (pin) { setNext(pin.dataset.setNext); return; }
     if (e.target.closest('[data-pick-again]')) { pickRandom(); return; }

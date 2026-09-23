@@ -1413,7 +1413,29 @@ function openEditor(id) {
       <button type="button" class="btn primary grow" data-add>${esc(T('add'))}</button></div>`));
   }
 
+  const imageBlock = `
+    <div class="field">
+      <span class="label">${esc(T('image'))}</span>
+      <div class="image-edit">
+        ${isNew ? '<div data-poster></div>' : ''}
+        <div class="btn-row">
+          <button type="button" class="btn small" data-find>${icon('search')}${esc(T('findImage'))}</button>
+          <button type="button" class="btn small" data-link>${icon('link')}${esc(T('pasteLink'))}</button>
+          <button type="button" class="btn small" data-upload>${icon('upload')}${esc(T('uploadImage'))}</button>
+          <button type="button" class="btn small danger" data-remove-img>${icon('trash')}${esc(T('removeImage'))}</button>
+        </div>
+      </div>
+      <form class="search-row" data-link-form hidden style="margin:0">
+        <input id="fImgUrl" class="input ltr" type="url" inputmode="url" placeholder="https://…" autocomplete="off" aria-label="${esc(T('pasteLink'))}">
+        <button type="submit" class="btn primary">${esc(T('useLink'))}</button>
+      </form>
+      <div data-img-err class="error-text" hidden></div>
+      <div data-linked class="hint"></div>
+      <input type="file" id="fImgFile" accept="image/*" hidden>
+    </div>
+  `;
   body.innerHTML = `
+    ${isNew ? '' : '<div class="hero" data-hero></div>'}
     <div class="field">
       <label for="fTitle">${esc(T('title'))}</label>
       <input id="fTitle" class="input" dir="auto" autocomplete="off" enterkeyhint="done" value="${esc(show.title)}">
@@ -1430,25 +1452,7 @@ function openEditor(id) {
         <select id="fPlatform" class="select" data-platforms></select>
       </div>
     </div>
-    <div class="field">
-      <span class="label">${esc(T('image'))}</span>
-      <div class="image-edit">
-        <div data-poster></div>
-        <div class="btn-row">
-          <button type="button" class="btn small" data-find>${icon('search')}${esc(T('findImage'))}</button>
-          <button type="button" class="btn small" data-link>${icon('link')}${esc(T('pasteLink'))}</button>
-          <button type="button" class="btn small" data-upload>${icon('upload')}${esc(T('uploadImage'))}</button>
-          <button type="button" class="btn small danger" data-remove-img>${icon('trash')}${esc(T('removeImage'))}</button>
-        </div>
-      </div>
-      <form class="search-row" data-link-form hidden style="margin:0">
-        <input id="fImgUrl" class="input ltr" type="url" inputmode="url" placeholder="https://…" autocomplete="off" aria-label="${esc(T('pasteLink'))}">
-        <button type="submit" class="btn primary">${esc(T('useLink'))}</button>
-      </form>
-      <div data-img-err class="error-text" hidden></div>
-      <div data-linked class="hint"></div>
-      <input type="file" id="fImgFile" accept="image/*" hidden>
-    </div>
+${isNew ? imageBlock : ''}
     <div data-watch-top></div>
     <div class="two">
       <div class="field">
@@ -1489,6 +1493,7 @@ function openEditor(id) {
       <label for="fNote">${esc(T('note'))}</label>
       <textarea id="fNote" class="textarea" dir="auto">${esc(show.note)}</textarea>
     </div>
+    ${isNew ? '' : imageBlock}
     <div class="toggle-row">
       <span><span style="display:block">${esc(T('needsCheck'))}</span><span class="hint">${esc(T('needsCheckHint'))}</span></span>
       <button type="button" class="switch" role="switch" id="fCheck" aria-checked="${show.needsCheck}" aria-label="${esc(T('needsCheck'))}"></button>
@@ -1520,7 +1525,15 @@ function openEditor(id) {
       <button type="button" class="star-btn${n <= show.rating ? ' on' : ''}" role="radio" aria-checked="${n === show.rating}" aria-label="${n}" data-star="${n}">${icon('star')}</button>`).join('');
   }
   function renderImage() {
-    $('[data-poster]', body).innerHTML = posterHTML(show);
+    const small = $('[data-poster]', body);
+    if (small) small.innerHTML = posterHTML(show);
+    const hero = $('[data-hero]', body);
+    if (hero) {
+      const img = safeImg(show.image);
+      hero.style.setProperty('--hero-img', img ? `url("${img.replace(/"/g, '%22')}")` : 'none');
+      hero.classList.toggle('has-img', !!img);
+      hero.innerHTML = `<div class="hero-poster">${posterHTML(show)}</div>`;
+    }
     $('[data-remove-img]', body).hidden = !show.image;
     const linked = $('[data-linked]', body);
     if (show.tvmaze) {

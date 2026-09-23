@@ -911,3 +911,31 @@ body { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
 [data-design~="compact"] .row .poster, [data-design~="compact"] .trow .poster { width: 34px; border-radius: 5px; }
 .row { padding: 6px; }
 [data-design~="compact"] .row { padding: 6px 10px; }
+
+/* =================================================================
+   Details screen: the poster on its own at the top
+   ================================================================= */
+.hero {
+  position: relative; overflow: hidden;
+  display: grid; place-items: center;
+  margin: -14px -16px 0; padding: 22px 16px 20px;
+  background: var(--surface-2);
+}
+.hero.has-img::before {
+  content: ""; position: absolute; inset: -30px;
+  background: var(--hero-img) center / cover no-repeat;
+  filter: blur(26px) saturate(1.2);
+  opacity: .55; transform: scale(1.1);
+}
+.hero::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(transparent 55%, var(--bg));
+}
+.hero-poster { position: relative; z-index: 1; width: 150px; max-width: 45%; }
+.hero-poster .poster { border-radius: 14px; box-shadow: 0 14px 36px rgba(0, 0, 0, .35); }
+[data-design~="compact"] .hero-poster { width: 120px; }
+[data-design~="cinema"] .hero-poster { width: 170px; }
+[data-design~="cinema"][data-design~="compact"] .hero-poster { width: 130px; }
+.image-edit .btn-row:only-child { flex-direction: row; flex-wrap: wrap; }
+.hero { flex: none; }
+.hero-poster .poster { flex: none; }

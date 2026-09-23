@@ -953,3 +953,6 @@ body { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
 .pop::-webkit-scrollbar { display: none; }
 .pop-title { text-align: center; font-size: 13px; padding: 8px 10px 6px; }
 .pop-opt { min-height: 46px; font-size: 16px; padding: 0 14px; }
+/* "הבא בתור" toggle: one line in every design; filled pin when on */
+.next-toggle { white-space: nowrap; }
+.next-toggle[aria-pressed="true"] svg.i { fill: currentColor; }

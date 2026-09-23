@@ -109,6 +109,9 @@ const STRINGS = {
     discardTitle: 'לבטל את ההוספה?', discardBody: 'מה שהוקלד לא יישמר.', discard: 'ביטול ההוספה', keepEditing: 'המשך עריכה',
     swipeHint: 'טיפ: החלקה שמאלה או לחיצה ארוכה על סדרה מעבירות אותה לקטגוריה אחרת.',
     saved: 'השינויים נשמרו',
+    pasteLinkMenu: 'עדכון קישור מהלוח', pasteBtn: 'הדבקה', linkUpdated: 'קישור הצפייה עודכן',
+    clipboardEmpty: 'אין קישור בלוח. כדאי להעתיק קודם את כתובת הדף באתר הצפייה.',
+    clipboardBlocked: 'אין גישה ללוח. אפשר להדביק את הקישור ידנית בשדה.',
   },
   en: {
     appName: 'My Series', search: 'Search a series, platform or note…', sort: 'Sort',
@@ -182,6 +185,9 @@ const STRINGS = {
     discardTitle: 'Discard this series?', discardBody: 'What you typed won’t be saved.', discard: 'Discard', keepEditing: 'Keep editing',
     swipeHint: 'Tip: swipe a series left, or long-press it, to move it to another category.',
     saved: 'Changes saved',
+    pasteLinkMenu: 'Update link from clipboard', pasteBtn: 'Paste', linkUpdated: 'Watch link updated',
+    clipboardEmpty: 'No link in the clipboard. Copy the page address on the watch site first.',
+    clipboardBlocked: 'Can’t read the clipboard. Paste the link into the field instead.',
   },
 };
 
@@ -1017,6 +1023,35 @@ function moveShow(show, statusId) {
   });
 }
 
+// Reads a web link from the clipboard. Returns the link, '' when the clipboard
+// holds no link, or null when the browser won't allow reading it.
+async function readClipboardLink() {
+  if (!navigator.clipboard || !navigator.clipboard.readText) return null;
+  try {
+    const text = (await navigator.clipboard.readText()).trim();
+    const m = text.match(/https?:\/\/[^\s<>"']+/i);
+    return m && isWatchUrl(m[0]) ? m[0] : '';
+  } catch (e) { return null; }
+}
+
+// Saves the clipboard link as the series' watch link (with undo).
+async function updateLinkFromClipboard(show) {
+  const url = await readClipboardLink();
+  if (url === null) {
+    toast(T('clipboardBlocked'), 5000);
+    // Let the menu finish closing before the editor opens.
+    setTimeout(() => openEditor(show.id), 120);
+    return;
+  }
+  if (!url) { toast(T('clipboardEmpty'), 5000); return; }
+  const prev = { watchUrl: show.watchUrl, updatedAt: show.updatedAt };
+  show.watchUrl = url;
+  show.updatedAt = Date.now();
+  save();
+  renderList();
+  toast(T('linkUpdated'), 5000, { label: T('undo'), fn: () => { Object.assign(show, prev); save(); renderList(); } });
+}
+
 // A small popup menu next to the swiped series.
 function openMoveMenu(id, anchor) {
   const show = state.shows.find((s) => s.id === id);
@@ -1032,11 +1067,17 @@ function openMoveMenu(id, anchor) {
           </button>`).join('')}
         <div class="pop-sep"></div>
         ${isCandidate ? `<button type="button" class="pop-opt" data-pop-next aria-pressed="${state.nextId === show.id}">${icon('pin')}<span>${esc(state.nextId === show.id ? T('unsetNext') : T('setNext'))}</span></button>` : ''}
+        <button type="button" class="pop-opt" data-pop-paste>${icon('link')}<span>${esc(T('pasteLinkMenu'))}</span></button>
         <button type="button" class="pop-opt" data-details>${icon('list')}<span>${esc(T('openDetails'))}</span></button>
       </div>
     </div>`);
   const body = $('.pop', layer);
   body.addEventListener('click', (e) => {
+    if (e.target.closest('[data-pop-paste]')) {
+      closeTop();
+      updateLinkFromClipboard(show);
+      return;
+    }
     if (e.target.closest('[data-pop-next]')) {
       closeTop();
       setNext(show.id);
@@ -1429,7 +1470,10 @@ function openEditor(id) {
     </div>
     <div class="field">
       <label for="fWatch">${esc(T('watchLink'))}</label>
-      <input id="fWatch" class="input ltr" type="url" inputmode="url" placeholder="https://…" autocomplete="off" value="${esc(show.watchUrl)}">
+      <div class="search-row" style="margin:0">
+        <input id="fWatch" class="input ltr" type="url" inputmode="url" placeholder="https://…" autocomplete="off" value="${esc(show.watchUrl)}">
+        <button type="button" class="btn" data-paste-watch>${icon('link')}${esc(T('pasteBtn'))}</button>
+      </div>
       <span class="hint" data-watch-hint>${esc(T('watchLinkHint'))}</span>
     </div>
     <div class="field">
@@ -1620,6 +1664,14 @@ function openEditor(id) {
     show.imdb = id;
     renderWatchTop();
     touch({ list: false });
+  });
+  $('[data-paste-watch]', body).addEventListener('click', async () => {
+    const url = await readClipboardLink();
+    const input = $('#fWatch', body);
+    if (url === null) { toast(T('clipboardBlocked'), 5000); input.focus(); return; }
+    if (!url) { toast(T('clipboardEmpty'), 5000); return; }
+    input.value = url;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
   });
   $('#fWatch', body).addEventListener('input', (e) => {
     const v = e.target.value.trim();
@@ -2051,10 +2103,31 @@ async function shareBackup() {
 }
 
 /* ---------- Boot ---------- */
+const SCROLL_KEY = 'seriesTracker.scroll';
+function saveScroll() {
+  try {
+    const all = JSON.parse(localStorage.getItem(SCROLL_KEY) || '{}');
+    all[state.page] = Math.round(window.scrollY);
+    localStorage.setItem(SCROLL_KEY, JSON.stringify(all));
+  } catch (e) { /* storage unavailable */ }
+}
+function restoreScroll() {
+  try {
+    const y = JSON.parse(localStorage.getItem(SCROLL_KEY) || '{}')[state.page];
+    if (y > 0) window.scrollTo(0, y);
+  } catch (e) { /* storage unavailable */ }
+}
+
 function init() {
   load();
   applyPrefs();
   renderList();
+  // Coming back from a watch link can reload the app: return to where you were.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  requestAnimationFrame(restoreScroll);
+  window.addEventListener('scroll', debounce(saveScroll, 200), { passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveScroll(); });
+  window.addEventListener('pagehide', saveScroll);
 
   $('#chips').addEventListener('click', (e) => {
     const b = e.target.closest('[data-tab]');
@@ -2067,6 +2140,7 @@ function init() {
   $('#bottomNav').addEventListener('click', (e) => {
     const b = e.target.closest('[data-page]');
     if (!b) return;
+    saveScroll();
     state.page = b.dataset.page;
     if (query) { $('#searchBar').hidden = true; $('#searchInput').value = ''; query = ''; }
     save();

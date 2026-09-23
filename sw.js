@@ -1,9 +1,9 @@
 // Offline support. App files are fetched fresh when online (so updates show up
 // on the next open) and fall back to the cached copy when offline. Posters are
 // cached after first view. TVmaze searches always go to the network.
-const SHELL_CACHE = 'series-shell-v19';
+const SHELL_CACHE = 'series-shell-v20';
 const IMAGE_CACHE = 'series-images-v1';
-const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
+const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/favicon-32.png'];
 
 self.addEventListener('install', (e) => {
   // cache: 'reload' skips the browser's HTTP cache so a new version never caches old files.

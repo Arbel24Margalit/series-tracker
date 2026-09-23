@@ -965,3 +965,7 @@ body { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
 }
 .sheet-head { touch-action: none; }
 .sheet-body { overscroll-behavior-y: contain; }
+
+/* Logo beside the title */
+.brand-logo { width: 30px; height: 30px; flex: none; border-radius: 8px; display: block; }
+[data-design~="compact"] .brand-logo { width: 24px; height: 24px; border-radius: 6px; }

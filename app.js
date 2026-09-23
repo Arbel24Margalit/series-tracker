@@ -28,7 +28,8 @@ const DEFAULT_PLATFORMS = ['FlixHQ', 'Netflix', 'Apple TV (מחשב)', 'YouTube'
 const DEFAULT_PAGES = { watching: 'today', paused: 'today', upnext: 'next', maybe: 'next', retry: 'next', rewatch: 'next' };
 const SCHEMA_VERSION = 2;
 const PAGES = ['today', 'next', 'fav', 'all'];
-const UNKNOWN_PF = '__none';
+const DESIGNS = ['classic', 'cinema', 'compact'];
+const DEFAULT_VIEWS = { today: 'list', next: 'list', fav: 'grid', all: 'grid' };
 
 /* ---------- Strings ---------- */
 const STRINGS = {
@@ -80,6 +81,11 @@ const STRINGS = {
     todayTitle: 'מה לראות היום', nextTitle: 'מה יהיה הבא?', favTitle: 'מועדפים', allTitle: 'כל הסדרות',
     todayHint: 'מה הבא בתור, מה שבאמצע, ומה בהפסקה. ▶ פותח את הקישור לצפייה. גרירת סדרה שמאלה מעבירה אותה לקטגוריה אחרת.',
     moveTitle: 'להעביר את "{0}" אל:', current: 'עכשיו', openDetails: 'פתיחת הפרטים',
+    searchAll: 'חיפוש בכל הסדרות…', openSearch: 'חיפוש', closeSearch: 'סגירת החיפוש',
+    design: 'עיצוב', designClassic: 'קלאסי', designCinema: 'קולנוע', designCompact: 'צפוף',
+    designClassicHint: 'המראה הרגיל: כרטיסים עם צל ורווחים נוחים.',
+    designCinemaHint: 'תמיד כהה, פוסטרים גדולים בשני טורים ותפריט צף.',
+    designCompactHint: 'הרבה סדרות במסך אחד: שורות צפופות ותמונות קטנות.',
     upNextTitle: 'הבאה בתור', noNextTitle: 'עוד לא נבחרה הסדרה הבאה', noNext: 'בדף "הבא בתור" מסמנים סדרה כהבאה.',
     chooseNext: 'לבחירת הסדרה הבאה', changeNext: 'החלפה', setNext: 'הבאה בתור', unsetNext: 'הבאה בתור ✓',
     nextSet: '"{0}" נקבעה כהבאה בתור', nextCleared: 'הוסרה מ"הבאה בתור"', resume: 'חזרה לצפייה',
@@ -147,6 +153,11 @@ const STRINGS = {
     todayTitle: 'What to watch today', nextTitle: 'What’s next?', favTitle: 'Favorites', allTitle: 'All series',
     todayHint: 'What’s next, what you’re in the middle of, and what’s on hold. ▶ opens the watch link. Swipe a series left to move it to another category.',
     moveTitle: 'Move “{0}” to:', current: 'current', openDetails: 'Open details',
+    searchAll: 'Search all series…', openSearch: 'Search', closeSearch: 'Close search',
+    design: 'Design', designClassic: 'Classic', designCinema: 'Cinema', designCompact: 'Compact',
+    designClassicHint: 'The standard look: shadowed cards and comfortable spacing.',
+    designCinemaHint: 'Always dark, large posters in two columns, floating menu.',
+    designCompactHint: 'Many series per screen: dense rows and small thumbnails.',
     upNextTitle: 'Next up', noNextTitle: 'No next series chosen yet', noNext: 'Mark one as next on the “Up next” page.',
     chooseNext: 'Choose the next series', changeNext: 'Change', setNext: 'Next up', unsetNext: 'Next up ✓',
     nextSet: '“{0}” is next up', nextCleared: 'Removed from “Next up”', resume: 'Resume',
@@ -323,7 +334,8 @@ function defaultState() {
   return {
     version: SCHEMA_VERSION,
     nextId: null,
-    lang: 'he', theme: 'system', view: 'grid', sort: 'updated', tab: 'all', page: 'today', pf: '',
+    lang: 'he', theme: 'system', design: 'classic', view: 'grid', sort: 'updated', tab: 'all', page: 'today', pf: '',
+    views: { ...DEFAULT_VIEWS },
     lastBackup: null,
     platforms: DEFAULT_PLATFORMS.slice(),
     statuses: DEFAULT_STATUSES.map((s) => ({ ...s, page: DEFAULT_PAGES[s.id] || '' })),
@@ -398,7 +410,13 @@ function normalizeState(raw) {
     sort: ['updated', 'added', 'title', 'rating'].includes(raw.sort) ? raw.sort : 'updated',
     tab: typeof raw.tab === 'string' ? raw.tab : 'all',
     page: PAGES.includes(raw.page) ? raw.page : 'today',
-    pf: typeof raw.pf === 'string' ? raw.pf : '',
+    pf: '',
+    design: DESIGNS.includes(raw.design) ? raw.design : 'classic',
+    views: Object.fromEntries(PAGES.map((pg) => {
+      const v = raw.views && raw.views[pg];
+      const legacy = (pg === 'fav' || pg === 'all') && raw.view === 'list' ? 'list' : DEFAULT_VIEWS[pg];
+      return [pg, v === 'grid' || v === 'list' ? v : legacy];
+    })),
     lastBackup: Number.isFinite(raw.lastBackup) ? raw.lastBackup : null,
     platforms, statuses, shows,
   };
@@ -534,22 +552,31 @@ function applyPrefs() {
   root.dir = state.lang === 'he' ? 'rtl' : 'ltr';
   if (state.theme === 'system') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', state.theme);
+  root.setAttribute('data-design', state.design);
   document.title = T('appName');
   $('#brandText').textContent = T('appName');
   $('#addBtnText').textContent = T('addSeries');
-  $('#searchInput').placeholder = T('search');
-  $('#searchInput').setAttribute('aria-label', T('search'));
+  $('#searchInput').placeholder = T('searchAll');
+  $('#searchInput').setAttribute('aria-label', T('searchAll'));
+  $('#searchBtn').innerHTML = icon('search');
+  $('#searchBtn').setAttribute('aria-label', T('openSearch'));
+  $('#searchClose').innerHTML = icon('close');
+  $('#searchClose').setAttribute('aria-label', T('closeSearch'));
   $('#settingsBtn').innerHTML = icon('gear');
   $('#settingsBtn').setAttribute('aria-label', T('settings'));
-  const vt = $('#viewToggle');
-  vt.innerHTML = icon(state.view === 'grid' ? 'list' : 'grid');
-  vt.setAttribute('aria-label', state.view === 'grid' ? T('viewList') : T('viewGrid'));
   const sortSel = $('#sortSelect');
   sortSel.setAttribute('aria-label', T('sort'));
   sortSel.innerHTML = ['updated', 'added', 'title', 'rating']
     .map((k) => `<option value="${k}">${esc(T('sort' + k[0].toUpperCase() + k.slice(1)))}</option>`).join('');
   sortSel.value = state.sort;
   $('.search-icon').innerHTML = icon('search');
+  const meta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (meta) meta.remove();
+  if (state.design === 'cinema') {
+    const m = document.createElement('meta');
+    m.name = 'theme-color'; m.content = '#0c0b10';
+    document.head.appendChild(m);
+  }
 }
 
 /* ---------- Main list ---------- */
@@ -649,7 +676,7 @@ function watchBtn(show, cls) {
 function cardHTML(show) {
   const play = watchBtn(show, 'play-btn');
   return `
-    <div class="card">
+    <div class="card${state.nextId === show.id ? ' is-next' : ''}">
       ${play ? `<div class="poster-overlay">${play}</div>` : ''}
       <button type="button" class="card-open" data-open="${esc(show.id)}">
         ${posterHTML(show, { flag: true })}
@@ -681,11 +708,6 @@ function rowHTML(show) {
 let nextPick = null; // id of the current "pick for me" suggestion
 
 const statusesForPage = (page) => state.statuses.filter((st) => st.page === page);
-function pfMatches(show) {
-  if (!state.pf) return true;
-  if (state.pf === UNKNOWN_PF) return !show.platform;
-  return show.platform === state.pf;
-}
 function linkBtn(href, label, cls = 'btn small') {
   return `<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
 }
@@ -694,22 +716,6 @@ function imdbLink(show, cls) {
   return '';
 }
 
-// Platform filter chips for the Today / Up next pages (only platforms that have series).
-function pfChipsHTML(pool) {
-  const opts = [...state.platforms, ...new Set(pool.map((s) => s.platform).filter((p) => p && !state.platforms.includes(p)))];
-  const chips = [{ v: '', label: T('anyPlatform'), n: pool.length }]
-    .concat(opts.map((p) => ({ v: p, label: p, n: pool.filter((s) => s.platform === p).length })))
-    .concat([{ v: UNKNOWN_PF, label: T('unknownPlatform'), n: pool.filter((s) => !s.platform).length }])
-    .filter((c) => c.n > 0 || c.v === state.pf);
-  if (chips.length <= 2 && !state.pf) return '';
-  return `<nav class="chips page-chips" aria-label="${esc(T('platform'))}">${chips.map((c) => `
-    <button type="button" class="chip" data-pf="${esc(c.v)}" aria-pressed="${c.v === state.pf}">
-      <span>${esc(c.label)}</span><span class="count">${c.n}</span>
-    </button>`).join('')}</nav>`;
-}
-function pageHead(title, hint) {
-  return `<header class="page-head"><h2 class="page-title">${esc(title)}</h2>${hint ? `<p class="page-hint">${esc(hint)}</p>` : ''}</header>`;
-}
 function emptyHTML(title, body, extra = '') {
   return `<div class="empty"><strong>${esc(title)}</strong>${esc(body)}${extra}</div>`;
 }
@@ -733,6 +739,8 @@ function todayRowHTML(show, { resume = false } = {}) {
       ${watch ? `<div class="trow-actions">${watch}</div>` : ''}
     </div>`;
 }
+
+const viewOf = (page) => (state.views && state.views[page]) || DEFAULT_VIEWS[page];
 
 function candidateRowHTML(show) {
   const sec = secondaryTitle(show);
@@ -823,57 +831,62 @@ function nextUpHTML() {
     </section>`;
 }
 
+function groupHead(st, n) {
+  return `<h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${n}</span></h3>`;
+}
+
 function renderToday(list) {
   const cats = statusesForPage('today');
   const pool = state.shows.filter((s) => cats.some((c) => c.id === s.status));
+  const grid = viewOf('today') === 'grid';
   const [first, ...rest] = cats;
   const group = (st, opts) => {
-    const g = pool.filter((s) => s.status === st.id && pfMatches(s)).sort((a, b) => b.updatedAt - a.updatedAt);
+    const g = pool.filter((s) => s.status === st.id).sort((a, b) => b.updatedAt - a.updatedAt);
     if (!g.length) return '';
-    return `
-      <section class="group">
-        <h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${g.length}</span></h3>
-        <div class="rows">${g.map((s) => todayRowHTML(s, opts)).join('')}</div>
-      </section>`;
+    const items = grid
+      ? `<div class="grid">${g.map(cardHTML).join('')}</div>`
+      : `<div class="rows">${g.map((s) => todayRowHTML(s, opts)).join('')}</div>`;
+    return `<section class="group">${groupHead(st, g.length)}${items}</section>`;
   };
   const current = first ? group(first) : '';
   const others = rest.map((st) => group(st, { resume: true })).join('');
-  const nothing = !pool.length
-    ? emptyHTML(T('todayEmptyTitle'), T('todayEmpty'))
-    : (!current && !others && state.pf ? emptyHTML(T('emptyFilterTitle'), T('pfEmpty')) : '');
-  list.innerHTML = pageHead(T('todayTitle'), T('todayHint')) + pfChipsHTML(pool) +
-    nextUpHTML() + (current || (pool.length ? '' : nothing)) + others + (pool.length ? nothing : '');
+  const empty = pool.length ? '' : emptyHTML(T('todayEmptyTitle'), T('todayEmpty'));
+  // Order: in progress, on hold, and the chosen next series at the bottom.
+  list.innerHTML = empty + current + others + nextUpHTML();
 }
 
 function renderNext(list) {
   const cats = statusesForPage('next');
-  const pool = state.shows.filter((s) => cats.some((c) => c.id === s.status));
-  const hint = T('nextHint', cats.map((c) => `"${statusLabel(c)}"`).join(', '));
-  if (!pool.length) {
-    list.innerHTML = pageHead(T('nextTitle'), cats.length ? hint : '') + emptyHTML(T('nextEmptyTitle'), T('nextEmpty'));
+  const items = state.shows.filter((s) => cats.some((c) => c.id === s.status));
+  if (!items.length) {
+    list.innerHTML = emptyHTML(T('nextEmptyTitle'), T('nextEmpty'));
     return;
   }
-  const items = pool.filter(pfMatches);
+  const grid = viewOf('next') === 'grid';
+  const render = (g) => (grid
+    ? `<div class="grid">${g.map(cardHTML).join('')}</div>`
+    : `<div class="rows">${g.map(candidateRowHTML).join('')}</div>`);
   const pick = nextPick && items.find((s) => s.id === nextPick);
   if (!pick) nextPick = null;
+  // The chosen next series opens the list; it isn't repeated in its category below.
+  const next = nextUpShow();
+  const nextBlock = next ? `
+    <section class="group">
+      <h3 class="group-head"><span style="color:var(--accent);display:inline-flex">${icon('pin')}</span>${esc(T('upNextTitle'))}</h3>
+      ${render([next])}
+    </section>` : '';
   const groups = cats.map((st) => {
-    const g = items.filter((s) => s.status === st.id).sort((a, b) => b.updatedAt - a.updatedAt);
-    if (!g.length) return '';
-    return `
-      <section class="group">
-        <h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${g.length}</span></h3>
-        <div class="rows">${g.map(candidateRowHTML).join('')}</div>
-      </section>`;
+    const g = items.filter((s) => s.status === st.id && (!next || s.id !== next.id)).sort((a, b) => b.updatedAt - a.updatedAt);
+    return g.length ? `<section class="group">${groupHead(st, g.length)}${render(g)}</section>` : '';
   }).join('');
-  list.innerHTML = pageHead(T('nextTitle'), hint) + pfChipsHTML(pool) +
-    (items.length ? `
-      ${pick ? pickCardHTML(pick) : `<button type="button" class="btn pick-btn" data-pick-again>${icon('dice')}${esc(T('pickForMe'))}</button>`}
-      ${groups}` : emptyHTML(T('emptyFilterTitle'), T('pfEmpty')));
+  list.innerHTML = nextBlock +
+    (pick ? pickCardHTML(pick) : `<button type="button" class="btn pick-btn" data-pick-again>${icon('dice')}${esc(T('pickForMe'))}</button>`) +
+    groups;
 }
 
 function pickRandom() {
   const cats = statusesForPage('next');
-  const items = state.shows.filter((s) => cats.some((c) => c.id === s.status) && pfMatches(s));
+  const items = state.shows.filter((s) => cats.some((c) => c.id === s.status));
   if (!items.length) return;
   const others = items.length > 1 ? items.filter((s) => s.id !== nextPick) : items;
   nextPick = others[Math.floor(Math.random() * others.length)].id;
@@ -910,49 +923,53 @@ function renderNav() {
     <button type="button" data-page="${t.page}" aria-current="${t.page === state.page ? 'page' : 'false'}">
       ${icon(t.ic)}<span>${esc(t.label)}</span>
     </button>`).join('');
-  const lib = state.page === 'all';
-  $('#libraryTools').hidden = !lib;
-  $('#viewToggle').hidden = !(lib || state.page === 'fav');
+  $('#libraryTools').hidden = state.page !== 'all' || !!query;
+  const v = viewOf(query ? 'all' : state.page);
+  const vt = $('#viewToggle');
+  vt.innerHTML = icon(v === 'grid' ? 'list' : 'grid');
+  vt.setAttribute('aria-label', v === 'grid' ? T('viewList') : T('viewGrid'));
 }
 
 function renderList() {
   renderNav();
   const list = $('#list');
+  if (query) { renderSearch(list); return; }
   if (state.page === 'today') { renderToday(list); return; }
   if (state.page === 'next') { renderNext(list); return; }
   if (state.page === 'fav') { renderFav(list); return; }
   renderAll(list);
 }
 
-function itemsHTML(items) {
-  return state.view === 'grid'
+function itemsHTML(items, view = viewOf(state.page)) {
+  return view === 'grid'
     ? `<div class="grid">${items.map(cardHTML).join('')}</div>`
     : `<div class="rows">${items.map(rowHTML).join('')}</div>`;
 }
-function groupedHTML(visible) {
+function groupedHTML(visible, view) {
   return state.statuses.map((st) => {
     const items = visible.filter((s) => s.status === st.id);
     if (!items.length) return '';
-    return `
-      <section class="group">
-        <h3 class="group-head"><span class="dot" style="--c:${st.color}"></span>${esc(statusLabel(st))}<span class="count">${items.length}</span></h3>
-        ${itemsHTML(items)}
-      </section>`;
+    return `<section class="group">${groupHead(st, items.length)}${itemsHTML(items, view)}</section>`;
   }).join('');
 }
 
 function renderFav(list) {
   const favs = sortShows(state.shows.filter((s) => s.favorite));
-  list.innerHTML = pageHead(T('favTitle')) + (favs.length ? groupedHTML(favs) : emptyHTML(T('favEmptyTitle'), T('favEmpty')));
+  list.innerHTML = favs.length ? groupedHTML(favs) : emptyHTML(T('favEmptyTitle'), T('favEmpty'));
+}
+
+// Search runs over every series, whatever page is open.
+function renderSearch(list) {
+  const found = sortShows(state.shows.filter(searchMatches));
+  list.innerHTML = found.length ? groupedHTML(found, viewOf('all')) : emptyHTML(T('emptyFilterTitle'), T('emptySearch', query));
 }
 
 function renderAll(list) {
   renderChips();
-  const visible = sortShows(state.shows.filter((s) => tabMatches(s) && searchMatches(s)));
+  const visible = sortShows(state.shows.filter(tabMatches));
   if (!visible.length) {
     let title = T('emptyFilterTitle'), body = T('emptyFilter');
-    if (query) body = T('emptySearch', query);
-    else if (!state.shows.length) { title = T('emptyAllTitle'); body = T('emptyAll'); }
+    if (!state.shows.length) { title = T('emptyAllTitle'); body = T('emptyAll'); }
     list.innerHTML = emptyHTML(title, body);
     return;
   }
@@ -988,21 +1005,31 @@ function moveShow(show, statusId) {
   });
 }
 
-function openMoveMenu(id) {
+// A small popup menu next to the swiped series.
+function openMoveMenu(id, anchor) {
   const show = state.shows.find((s) => s.id === id);
   if (!show) return;
-  const layer = sheetShell(T('moveTitle', primaryTitle(show)));
-  const body = $('.sheet-body', layer);
-  body.innerHTML = `
-    <div class="move-list">
-      ${state.statuses.map((st) => `
-        <button type="button" class="move-opt" data-move-to="${esc(st.id)}" aria-current="${st.id === show.status}" style="--c:${st.color}">
-          <span class="dot"></span><span>${esc(statusLabel(st))}</span>
-          ${st.id === show.status ? `<span class="hint">${esc(T('current'))}</span>` : ''}
-        </button>`).join('')}
-    </div>
-    <button type="button" class="btn" data-details>${esc(T('openDetails'))}</button>`;
+  const isCandidate = statusesForPage('next').some((c) => c.id === show.status);
+  const layer = el(`
+    <div class="layer pop-layer" role="dialog" aria-modal="true" aria-label="${esc(T('moveTitle', primaryTitle(show)))}">
+      <div class="pop">
+        <div class="pop-title"><bdi>${esc(primaryTitle(show))}</bdi></div>
+        ${state.statuses.map((st) => `
+          <button type="button" class="pop-opt" data-move-to="${esc(st.id)}" aria-current="${st.id === show.status}" style="--c:${st.color}">
+            <span class="dot"></span><span>${esc(statusLabel(st))}</span>
+          </button>`).join('')}
+        <div class="pop-sep"></div>
+        ${isCandidate ? `<button type="button" class="pop-opt" data-pop-next aria-pressed="${state.nextId === show.id}">${icon('pin')}<span>${esc(state.nextId === show.id ? T('unsetNext') : T('setNext'))}</span></button>` : ''}
+        <button type="button" class="pop-opt" data-details>${icon('list')}<span>${esc(T('openDetails'))}</span></button>
+      </div>
+    </div>`);
+  const body = $('.pop', layer);
   body.addEventListener('click', (e) => {
+    if (e.target.closest('[data-pop-next]')) {
+      closeTop();
+      setNext(show.id);
+      return;
+    }
     const b = e.target.closest('[data-move-to]');
     if (b) {
       closeTop();
@@ -1015,7 +1042,13 @@ function openMoveMenu(id) {
     }
   });
   openLayer(layer);
-  wireClose(layer);
+  // Place it at the swiped item's height, on the side the item was swiped towards.
+  const r = anchor || { top: innerHeight / 3, bottom: innerHeight / 3 };
+  const h = body.offsetHeight;
+  const top = Math.max(8, Math.min(r.top, innerHeight - h - 8));
+  body.style.top = `${top}px`;
+  body.style.left = '12px';
+  body.querySelector('[aria-current="true"]')?.focus({ preventScroll: true });
 }
 
 // Horizontal drag on a series card/row. Vertical scrolling stays native (touch-action: pan-y).
@@ -1062,7 +1095,7 @@ function initSwipe() {
     suppressClick = true;
     setTimeout(() => { suppressClick = false; }, 400);
     reset(item);
-    if (dx <= -THRESHOLD) openMoveMenu(id);
+    if (dx <= -THRESHOLD) openMoveMenu(id, item.getBoundingClientRect());
   };
   list.addEventListener('pointerup', end);
   list.addEventListener('pointercancel', (e) => {
@@ -1269,7 +1302,7 @@ function openEditor(id) {
   const existing = id ? state.shows.find((s) => s.id === id) : null;
   if (id && !existing) return;
   const isNew = !existing;
-  const show = existing || makeShow({ status: state.tab.startsWith('s:') ? state.tab.slice(2) : 'upnext', favorite: state.tab === 'fav' });
+  const show = existing || makeShow({ status: statusById('upnext') ? 'upnext' : state.statuses[0].id, favorite: false, season: 1 });
   let dirty = false;
 
   const layer = sheetShell(isNew ? T('addSeries') : primaryTitle(show));
@@ -1290,14 +1323,6 @@ function openEditor(id) {
       <div data-suggest class="results"></div>
     </div>
     <div class="field">
-      <span class="label" id="lblStatus">${esc(T('status'))}</span>
-      <div class="status-grid" role="radiogroup" aria-labelledby="lblStatus" data-statuses></div>
-    </div>
-    <div class="toggle-row">
-      <span>${icon('star')} ${esc(T('favorite'))}</span>
-      <button type="button" class="switch" role="switch" id="fFav" aria-checked="${show.favorite}" aria-label="${esc(T('favorite'))}"></button>
-    </div>
-    <div class="field">
       <span class="label">${esc(T('image'))}</span>
       <div class="image-edit">
         <div data-poster></div>
@@ -1316,18 +1341,33 @@ function openEditor(id) {
       <div data-linked class="hint"></div>
       <input type="file" id="fImgFile" accept="image/*" hidden>
     </div>
+    <div class="two">
+      <div class="field">
+        <label for="fStatus">${esc(T('status'))}</label>
+        <select id="fStatus" class="select" data-statuses></select>
+      </div>
+      <div class="field">
+        <label for="fPlatform">${esc(T('platform'))}</label>
+        <select id="fPlatform" class="select" data-platforms></select>
+      </div>
+    </div>
+    <div class="two">
+      <div class="field">
+        <label for="fSeason">${esc(T('season'))}</label>
+        <input id="fSeason" class="input" type="number" inputmode="numeric" min="1" max="99" value="${show.season ?? ''}">
+      </div>
+      <div class="field">
+        <span class="label">${esc(T('favorite'))}</span>
+        <div class="toggle-row compact-toggle">
+          <span style="color:var(--star);display:inline-flex">${icon('star')}</span>
+          <button type="button" class="switch" role="switch" id="fFav" aria-checked="${show.favorite}" aria-label="${esc(T('favorite'))}"></button>
+        </div>
+      </div>
+    </div>
     <div class="field">
       <label for="fAlt">${esc(T('altTitle'))}</label>
       <input id="fAlt" class="input" dir="auto" autocomplete="off" value="${esc(show.altTitle)}">
       <span class="hint">${esc(T('altHint'))}</span>
-    </div>
-    <div class="field">
-      <span class="label" id="lblPlatform">${esc(T('platform'))}</span>
-      <div class="status-grid" role="radiogroup" aria-labelledby="lblPlatform" data-platforms></div>
-    </div>
-    <div class="field">
-      <label for="fSeason">${esc(T('season'))}</label>
-      <input id="fSeason" class="input" type="number" inputmode="numeric" min="1" max="99" value="${show.season ?? ''}" style="max-width:10rem">
     </div>
     <div class="field">
       <label for="fWatch">${esc(T('watchLink'))}</label>
@@ -1367,10 +1407,11 @@ function openEditor(id) {
   }
 
   function renderStatuses() {
-    $('[data-statuses]', body).innerHTML = state.statuses.map((st) => `
-      <button type="button" class="status-opt" role="radio" data-status="${esc(st.id)}" aria-checked="${st.id === show.status}" style="--c:${st.color}">
-        <span class="dot"></span>${esc(statusLabel(st))}
-      </button>`).join('');
+    const sel = $('#fStatus', body);
+    sel.innerHTML = state.statuses.map((st) => `<option value="${esc(st.id)}">${esc(statusLabel(st))}</option>`).join('');
+    sel.value = show.status;
+    const st = statusById(show.status);
+    sel.style.setProperty('--c', st ? st.color : 'var(--line)');
   }
   function renderStars() {
     $('[data-stars]', body).innerHTML = [1, 2, 3, 4, 5].map((n) => `
@@ -1388,10 +1429,9 @@ function openEditor(id) {
   function renderPlatforms() {
     const opts = state.platforms.slice();
     if (show.platform && !opts.includes(show.platform)) opts.push(show.platform);
-    $('[data-platforms]', body).innerHTML = opts.concat(['']).map((p) => `
-      <button type="button" class="status-opt" role="radio" data-platform="${esc(p)}" aria-checked="${p === show.platform}" style="--c:var(--accent)">
-        ${esc(p || T('unknownPlatform'))}
-      </button>`).join('');
+    const sel = $('#fPlatform', body);
+    sel.innerHTML = opts.concat(['']).map((p) => `<option value="${esc(p)}">${esc(p || T('unknownPlatform'))}</option>`).join('');
+    sel.value = show.platform;
   }
   // Watch + IMDb buttons at the top of the sheet.
   function renderWatchTop() {
@@ -1489,10 +1529,9 @@ function openEditor(id) {
     }
   });
   $('#fAlt', body).addEventListener('input', (e) => { show.altTitle = e.target.value; renderWatchTop(); touch({ list: false }); });
-  $('[data-platforms]', body).addEventListener('click', (e) => {
-    const b = e.target.closest('[data-platform]');
-    if (!b || b.dataset.platform === show.platform) return;
-    show.platform = b.dataset.platform;
+  $('#fPlatform', body).addEventListener('change', (e) => {
+    if (e.target.value === show.platform) return;
+    show.platform = e.target.value;
     renderPlatforms(); renderWatchTop();
     touch();
   });
@@ -1538,10 +1577,9 @@ function openEditor(id) {
   $('#fSeason', body).addEventListener('input', (e) => { show.season = clampInt(e.target.value, 1, 99); touch({ list: false }); });
   $('#fNote', body).addEventListener('input', (e) => { show.note = e.target.value; touch({ list: false }); });
 
-  $('[data-statuses]', body).addEventListener('click', (e) => {
-    const b = e.target.closest('[data-status]');
-    if (!b || b.dataset.status === show.status) return;
-    show.status = b.dataset.status;
+  $('#fStatus', body).addEventListener('change', (e) => {
+    if (e.target.value === show.status || !statusById(e.target.value)) return;
+    show.status = e.target.value;
     renderStatuses();
     touch();
     if (!isNew) toast(T('movedTo', statusLabel(statusById(show.status))));
@@ -1663,6 +1701,18 @@ function openSettings() {
         </div>
       </section>
       <section class="section">
+        <h3>${esc(T('design'))}</h3>
+        <div class="design-list">
+          ${DESIGNS.map((d) => {
+            const k = d[0].toUpperCase() + d.slice(1);
+            return `<button type="button" class="design-opt" data-design-opt="${d}" aria-pressed="${state.design === d}">
+              <span class="design-swatch design-swatch-${d}" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span><strong>${esc(T('design' + k))}</strong><span class="hint">${esc(T('design' + k + 'Hint'))}</span></span>
+            </button>`;
+          }).join('')}
+        </div>
+      </section>
+      <section class="section">
         <h3>${esc(T('theme'))}</h3>
         <div class="seg" data-seg="theme">
           ${['system', 'light', 'dark'].map((v) => `<button type="button" data-val="${v}" aria-pressed="${state.theme === v}">${esc(T('theme' + v[0].toUpperCase() + v.slice(1)))}</button>`).join('')}
@@ -1743,6 +1793,12 @@ function openSettings() {
   }
 
   body.addEventListener('click', async (e) => {
+    const des = e.target.closest("[data-design-opt]");
+    if (des) {
+      state.design = des.dataset.designOpt;
+      save(); applyPrefs(); renderList(); render();
+      return;
+    }
     const seg = e.target.closest('[data-seg] button');
     if (seg) {
       const key = seg.parentElement.dataset.seg;
@@ -1949,6 +2005,7 @@ function init() {
     const b = e.target.closest('[data-page]');
     if (!b) return;
     state.page = b.dataset.page;
+    if (query) { $('#searchBar').hidden = true; $('#searchInput').value = ''; query = ''; }
     save();
     renderList();
     window.scrollTo({ top: 0 });
@@ -1956,8 +2013,6 @@ function init() {
   $('#list').addEventListener('click', (e) => {
     const fav = e.target.closest('[data-fav]');
     if (fav) { toggleFavorite(fav.dataset.fav); return; }
-    const pf = e.target.closest('[data-pf]');
-    if (pf) { state.pf = pf.dataset.pf; nextPick = null; save(); renderList(); return; }
     const start = e.target.closest('[data-start]');
     if (start) { startWatching(start.dataset.start); return; }
     const pin = e.target.closest('[data-set-next]');
@@ -1976,9 +2031,24 @@ function init() {
   $('#searchInput').addEventListener('input', debounce((e) => { query = e.target.value.trim(); renderList(); }, 120));
   $('#sortSelect').addEventListener('change', (e) => { state.sort = e.target.value; save(); renderList(); });
   $('#viewToggle').addEventListener('click', () => {
-    state.view = state.view === 'grid' ? 'list' : 'grid';
-    save(); applyPrefs(); renderList();
+    const page = query ? 'all' : state.page;
+    state.views[page] = viewOf(page) === 'grid' ? 'list' : 'grid';
+    save(); renderList();
   });
+  const bar = $('#searchBar');
+  const closeSearch = () => {
+    bar.hidden = true;
+    $('#searchInput').value = '';
+    query = '';
+    renderList();
+  };
+  $('#searchBtn').addEventListener('click', () => {
+    if (!bar.hidden) { closeSearch(); return; }
+    bar.hidden = false;
+    $('#searchInput').focus();
+  });
+  $('#searchClose').addEventListener('click', closeSearch);
+  $('#searchInput').addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearch(); });
   $('#settingsBtn').addEventListener('click', openSettings);
   $('#addBtn').addEventListener('click', () => openEditor(null));
 

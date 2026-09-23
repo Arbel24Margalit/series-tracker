@@ -20,19 +20,21 @@
   <div class="topbar-row">
     <h1 class="brand"><span class="brand-dot" aria-hidden="true"></span><span id="brandText">הסדרות שלי</span></h1>
     <div class="topbar-actions">
+      <button type="button" class="icon-btn" id="searchBtn" aria-label="חיפוש"></button>
       <button type="button" class="icon-btn" id="viewToggle" aria-label="תצוגה"></button>
       <button type="button" class="icon-btn" id="settingsBtn" aria-label="הגדרות"></button>
     </div>
   </div>
-  <div id="libraryTools">
-  <div class="search-row">
+  <div class="search-bar" id="searchBar" hidden>
     <label class="search">
       <span class="search-icon" aria-hidden="true"></span>
       <input type="search" id="searchInput" autocomplete="off" enterkeyhint="search">
     </label>
-    <select id="sortSelect" class="sort-select" aria-label="מיון"></select>
+    <button type="button" class="icon-btn" id="searchClose" aria-label="סגירה"></button>
   </div>
-  <nav class="chips" id="chips" aria-label="קטגוריות"></nav>
+  <div class="lib-row" id="libraryTools">
+    <select id="sortSelect" class="sort-select" aria-label="מיון"></select>
+    <nav class="chips" id="chips" aria-label="קטגוריות"></nav>
   </div>
 </header>
 

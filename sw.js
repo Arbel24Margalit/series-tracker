@@ -1,12 +1,17 @@
-// Offline support: the app shell is served from cache and refreshed in the
-// background; posters are cached after first view. TVmaze searches always go
-// to the network.
-const SHELL_CACHE = 'series-shell-v8';
+// Offline support. App files are fetched fresh when online (so updates show up
+// on the next open) and fall back to the cached copy when offline. Posters are
+// cached after first view. TVmaze searches always go to the network.
+const SHELL_CACHE = 'series-shell-v9';
 const IMAGE_CACHE = 'series-images-v1';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(SHELL_CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' skips the browser's HTTP cache so a new version never caches old files.
+  e.waitUntil(
+    caches.open(SHELL_CACHE)
+      .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -38,13 +43,18 @@ self.addEventListener('fetch', (e) => {
   }
 
   if (url.origin === self.location.origin || url.hostname === 'fonts.googleapis.com') {
+    // Network first (revalidated, so no stale HTTP-cache copy), cache as the offline fallback.
     e.respondWith(
       caches.open(SHELL_CACHE).then(async (cache) => {
-        const hit = await cache.match(req, { ignoreSearch: true });
-        const network = fetch(req)
-          .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
-          .catch(() => hit);
-        return hit || network;
+        try {
+          const res = await fetch(req, { cache: 'no-cache' });
+          if (res.ok) cache.put(req, res.clone());
+          return res;
+        } catch (err) {
+          const hit = await cache.match(req, { ignoreSearch: true });
+          if (hit) return hit;
+          throw err;
+        }
       })
     );
   }

@@ -548,9 +548,10 @@ function askDiscard(layer) {
 }
 
 function sheetShell(title, { center = false } = {}) {
-  return el(`
+  const layer = el(`
     <div class="layer${center ? ' center' : ''}" role="dialog" aria-modal="true">
       <div class="sheet">
+        ${center ? '' : '<div class="sheet-grip" aria-hidden="true"></div>'}
         <div class="sheet-head">
           <h2>${esc(title)}</h2>
           <button type="button" class="icon-btn" data-close aria-label="${esc(T('close'))}">${icon('close')}</button>
@@ -558,6 +559,45 @@ function sheetShell(title, { center = false } = {}) {
         <div class="sheet-body"></div>
       </div>
     </div>`);
+  if (!center) enableDragToClose(layer);
+  return layer;
+}
+
+// Bottom sheets close with a downward pull: from the grip/header at any time, or
+// from the content once it is scrolled all the way to the top (a second pull).
+function enableDragToClose(layer) {
+  const sheet = layer.querySelector('.sheet');
+  const CLOSE_AT = 110;
+  let startY = 0, dy = 0, active = false, armed = false;
+  sheet.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) { armed = false; return; }
+    const body = sheet.querySelector('.sheet-body');
+    const onHead = !!e.target.closest('.sheet-head, .sheet-grip');
+    // Only a pull that starts when the content is already at the top can close.
+    armed = onHead || (body && body.scrollTop <= 0);
+    startY = e.touches[0].clientY; dy = 0; active = false;
+  }, { passive: true });
+  sheet.addEventListener('touchmove', (e) => {
+    if (!armed) return;
+    dy = e.touches[0].clientY - startY;
+    if (!active) {
+      if (dy > 8) active = true;
+      else if (dy < -4) { armed = false; return; }
+      else return;
+    }
+    e.preventDefault(); // stop the page from scrolling/refreshing while dragging
+    sheet.style.transition = 'none';
+    sheet.style.transform = `translateY(${Math.max(0, dy)}px)`;
+  }, { passive: false });
+  const end = () => {
+    if (!active) { armed = false; return; }
+    active = false; armed = false;
+    sheet.style.transition = 'transform .18s ease-out';
+    sheet.style.transform = '';
+    if (dy > CLOSE_AT) closeTop();
+  };
+  sheet.addEventListener('touchend', end);
+  sheet.addEventListener('touchcancel', end);
 }
 function wireClose(layer) {
   layer.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => closeTop()));

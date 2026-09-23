@@ -843,3 +843,11 @@ a.icon-start.watch-now { background: var(--accent); color: var(--accent-ink); bo
 /* Rows with a full button line: name on top, buttons on their own line */
 .trow.is-next .row-open, .next-row .row-open { flex: 1 1 100%; }
 .trow.is-next .trow-actions, .next-row .trow-actions { flex: 1 1 100%; justify-content: flex-end; }
+/* Today's "next series" row: name on top, buttons on their own line (was squeezed) */
+.trow.next-row { flex-wrap: wrap; }
+.trow.next-row .row-open { flex: 1 1 100%; min-width: 0; }
+.trow.next-row .trow-actions { flex: 1 1 100%; flex-wrap: wrap; justify-content: flex-end; }
+/* Room below the last item so the round + button never covers it */
+body { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
+[data-design="cinema"] body { padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)); }
+[data-design="compact"] body { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }

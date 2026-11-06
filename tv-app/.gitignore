@@ -1,0 +1,4 @@
+*.jks
+build/
+.gradle/
+local.properties

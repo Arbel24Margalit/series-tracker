@@ -1,0 +1,86 @@
+/* TV screen: big, dark, readable from the couch, everything reachable with the remote's arrows. */
+:root {
+  --bg: #0d0e16;
+  --surface: #1a1c27;
+  --surface-2: #262938;
+  --ink: #f1f2f7;
+  --ink-2: #a9aec2;
+  --accent: #ff5c8f;
+  --focus: #ffffff;
+  --font: "Rubik", "Segoe UI", system-ui, Arial, sans-serif;
+  --display: "Secular One", "Rubik", system-ui, Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { font-size: clamp(14px, 1.25vw, 28px); }
+body {
+  margin: 0; min-height: 100vh;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font);
+  overflow-x: hidden;
+}
+button { font: inherit; color: inherit; }
+
+.tv-top {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 1.6rem;
+  padding: 1.6rem 3.5vw 1.2rem;
+  background: linear-gradient(var(--bg) 75%, transparent);
+}
+.tv-brand { display: flex; align-items: center; gap: .7rem; margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.9rem; white-space: nowrap; }
+.tv-brand img { width: 2.4rem; height: 2.4rem; }
+.tv-tabs { display: flex; gap: .7rem; flex: 1; overflow-x: auto; scrollbar-width: none; padding: .4rem; }
+.tv-tabs::-webkit-scrollbar { display: none; }
+
+.tv-tab, .tv-btn {
+  border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  padding: .55rem 1.3rem; font-size: 1.1rem; font-weight: 500;
+  background: var(--surface); color: var(--ink-2);
+  outline: none; transition: transform .12s, background .12s, box-shadow .12s;
+}
+.tv-tab .n { opacity: .7; margin-inline-start: .4rem; }
+.tv-tab[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 -3px 0 var(--c, var(--accent)); }
+.tv-btn { background: var(--surface-2); color: var(--ink); }
+.tv-btn.primary { background: var(--accent); color: #1a0710; font-weight: 700; }
+.tv-tab:focus, .tv-btn:focus { background: var(--focus); color: #111; transform: scale(1.08); box-shadow: 0 0 0 4px rgba(255,255,255,.25); }
+
+.tv-main { padding: 1.4rem 3.5vw 4rem; }
+.tv-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.8rem 1.4rem; }
+@media (max-aspect-ratio: 4/3) { .tv-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.tv-card {
+  position: relative; display: block; width: 100%; padding: 0; border: 0; text-align: start;
+  background: none; cursor: pointer; outline: none;
+}
+.tv-poster {
+  position: relative; aspect-ratio: 2 / 3; border-radius: .9rem; overflow: hidden;
+  background: var(--surface) center / cover no-repeat;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 1.5rem; color: var(--ink-2); padding: 1rem; text-align: center;
+  transition: transform .14s ease-out, box-shadow .14s;
+}
+.tv-poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tv-badge {
+  position: absolute; bottom: .6rem; inset-inline-start: .6rem; z-index: 1;
+  background: rgba(0,0,0,.75); color: #fff; border-radius: .5rem; padding: .2rem .55rem; font-size: .95rem; font-weight: 600;
+}
+.tv-nolink { position: absolute; top: .6rem; inset-inline-end: .6rem; z-index: 1; background: rgba(0,0,0,.75); border-radius: .5rem; padding: .2rem .55rem; font-size: .85rem; color: var(--ink-2); }
+.tv-title { margin-top: .6rem; font-size: 1.15rem; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tv-meta { font-size: .95rem; color: var(--ink-2); margin-top: .15rem; }
+.tv-card:focus .tv-poster { transform: scale(1.08); box-shadow: 0 0 0 .3rem var(--focus), 0 1rem 2.2rem rgba(0,0,0,.6); }
+.tv-card:focus .tv-title { color: #fff; }
+
+.tv-empty { max-width: 46rem; margin: 6vh auto 0; text-align: center; }
+.tv-empty h2 { font-family: var(--display); font-weight: 400; font-size: 2.2rem; margin: 0 0 1rem; }
+.tv-empty p { color: var(--ink-2); font-size: 1.25rem; line-height: 1.6; margin: .6rem 0; }
+.tv-code {
+  display: inline-block; direction: ltr; margin: 1.4rem 0; padding: 1rem 2rem; border-radius: 1rem;
+  background: var(--surface); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 3.6rem; letter-spacing: .25em; font-weight: 700;
+}
+.tv-empty .tv-btn { margin: .6rem .4rem; font-size: 1.25rem; padding: .8rem 1.8rem; }
+
+.tv-toast {
+  position: fixed; bottom: 2.4rem; left: 50%; transform: translateX(-50%); z-index: 10;
+  background: var(--surface-2); color: var(--ink); padding: .9rem 1.8rem; border-radius: 999px;
+  font-size: 1.2rem; box-shadow: 0 .6rem 2rem rgba(0,0,0,.5);
+}

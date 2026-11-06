@@ -78,6 +78,9 @@ const STRINGS = {
     lastBackup: 'גיבוי אחרון: {0}', neverBackedUp: 'עוד לא נשמר גיבוי',
     importConfirm: 'השחזור יחליף את כל הרשימה הנוכחית ({0} סדרות) בתוכן הקובץ ({1} סדרות). להמשיך?',
     replace: 'החלפה', imported: 'הרשימה שוחזרה מהקובץ', badFile: 'זה לא קובץ גיבוי של האתר.',
+    tv: 'טלוויזיה', tvHint: 'בטלוויזיה פותחים בדפדפן את האתר עם /tv.html בסוף הכתובת, ומקלידים כאן את הקוד שמופיע שם. אחרי שינויים בטלפון לוחצים שוב "שליחה לטלוויזיה", ובטלוויזיה "עדכון מהטלפון".',
+    tvCode: 'הקוד מהטלוויזיה', tvSend: 'שליחה לטלוויזיה', tvSending: 'שולח…', tvSent: 'נשלח! בטלוויזיה לוחצים "עדכון מהטלפון"',
+    tvBadCode: 'הקוד לא תקין. צריך 8 תווים, כמו K7P2-QM9X', tvFailed: 'השליחה נכשלה. בדוק שיש אינטרנט ונסה שוב.', tvOpen: 'פתיחת מסך הטלוויזיה כאן',
     exported: 'קובץ הגיבוי נשמר', storageError: 'השמירה נכשלה: הזיכרון של הדפדפן מלא. אפשר לפנות מקום בהסרת תמונות שהועלו מהטלפון.',
     imageTooBig: 'לא ניתן לקרוא את התמונה. אפשר לנסות תמונה אחרת.',
     about: 'על האתר', aboutText: 'מעקב צפייה אישי, בלי חשבון ובלי שרת. הכול נשמר במכשיר.',
@@ -153,6 +156,9 @@ const STRINGS = {
     lastBackup: 'Last backup: {0}', neverBackedUp: 'No backup saved yet',
     importConfirm: 'Restoring replaces your whole current list ({0} series) with the file’s content ({1} series). Continue?',
     replace: 'Replace', imported: 'List restored from file', badFile: 'This file isn’t a backup from this site.',
+    tv: 'TV', tvHint: 'On the TV, open this site in the browser with /tv.html at the end of the address, and type the code shown there here. After changes on the phone, tap "Send to TV" again, then "Update from phone" on the TV.',
+    tvCode: 'Code from the TV', tvSend: 'Send to TV', tvSending: 'Sending…', tvSent: 'Sent! On the TV, press "Update from phone"',
+    tvBadCode: 'That code isn’t valid. It has 8 characters, like K7P2-QM9X', tvFailed: 'Sending failed. Check the internet connection and try again.', tvOpen: 'Open the TV screen here',
     exported: 'Backup file saved', storageError: 'Saving failed – browser storage is full. Try removing images uploaded from the phone.',
     imageTooBig: 'Couldn’t read that image. Try another one.',
     about: 'About', aboutText: 'A personal watch tracker. No account and no server – everything stays on your device.',
@@ -350,6 +356,7 @@ function defaultState() {
     lang: 'he', theme: 'system', design: 'classic', view: 'grid', sort: 'updated', tab: 'all', page: 'today', pf: '',
     views: { ...DEFAULT_VIEWS },
     lastBackup: null,
+    tvCode: '',
     platforms: DEFAULT_PLATFORMS.slice(),
     statuses: DEFAULT_STATUSES.map((s) => ({ ...s, page: DEFAULT_PAGES[s.id] || '' })),
     shows: seedShows(),
@@ -431,6 +438,7 @@ function normalizeState(raw) {
       return [pg, v === 'grid' || v === 'list' ? v : legacy];
     })),
     lastBackup: Number.isFinite(raw.lastBackup) ? raw.lastBackup : null,
+    tvCode: typeof raw.tvCode === 'string' ? raw.tvCode : '',
     swipeHintShown: raw.swipeHintShown === true,
     platforms, statuses, shows,
   };
@@ -1842,6 +1850,43 @@ ${isNew ? imageBlock : ''}
 }
 
 /* ---------- Settings ---------- */
+/* ---------- Send to TV (see tvlink.js) ---------- */
+function tvPayload() {
+  return {
+    v: 1,
+    sentAt: Date.now(),
+    lang: state.lang,
+    statuses: state.statuses.map((st) => ({ id: st.id, he: st.he, en: st.en, color: st.color })),
+    shows: state.shows.map((s) => {
+      const target = watchTarget(s);
+      return {
+        title: s.title, alt: s.altTitle, status: s.status, fav: s.favorite,
+        season: s.season, platform: s.platform, updated: s.updatedAt,
+        // Uploaded photos are too big to send; links to posters are fine.
+        img: /^https:\/\//i.test(s.image) ? s.image : '',
+        url: target ? target.url : '', auto: target ? target.auto : false,
+      };
+    }),
+  };
+}
+async function sendToTv(btn, body) {
+  const input = $('#tvCodeInput', body);
+  const code = TvLink.cleanCode(input.value);
+  if (!code) { toast(T('tvBadCode'), 5000); input.focus(); return; }
+  input.value = code;
+  state.tvCode = code; save();
+  const label = btn.innerHTML;
+  btn.disabled = true; btn.textContent = T('tvSending');
+  try {
+    await TvLink.send(code, tvPayload());
+    toast(T('tvSent'), 6000);
+  } catch (err) {
+    toast(T('tvFailed'), 6000);
+  } finally {
+    btn.disabled = false; btn.innerHTML = label;
+  }
+}
+
 function openSettings() {
   const layer = sheetShell(T('settings'));
   const body = $('.sheet-body', layer);
@@ -1871,6 +1916,14 @@ function openSettings() {
         </div>
         <button type="button" class="btn" data-import>${icon('upload')}${esc(T('importFile'))}</button>
         <input type="file" id="importInput" accept="application/json,.json" hidden>
+      </section>
+      <section class="section">
+        <h3>${esc(T('tv'))}</h3>
+        <span class="hint">${esc(T('tvHint'))}</span>
+        <label class="hint" for="tvCodeInput">${esc(T('tvCode'))}</label>
+        <input id="tvCodeInput" class="input ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7P2-QM9X" maxlength="12" value="${esc(state.tvCode)}">
+        <button type="button" class="btn primary" data-tv-send>${icon('play')}${esc(T('tvSend'))}</button>
+        <a class="btn small" href="tv.html">${esc(T('tvOpen'))}</a>
       </section>
       <section class="section">
         <h3>${esc(T('design'))}</h3>
@@ -2012,6 +2065,7 @@ function openSettings() {
       if (queue.length) openPicker({ queue });
       return;
     }
+    if (e.target.closest('[data-tv-send]')) { sendToTv(e.target.closest('[data-tv-send]'), body); return; }
     if (e.target.closest('[data-export]')) { exportBackup(); render(); return; }
     if (e.target.closest('[data-share]')) { await shareBackup(); render(); return; }
     if (e.target.closest('[data-import]')) { $('#importInput', body).click(); }

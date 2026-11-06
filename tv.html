@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הסדרות שלי · טלוויזיה</title>
+<meta name="theme-color" content="#0d0e16">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Secular+One&display=swap">
+<link rel="stylesheet" href="tv.css">
+</head>
+<body>
+<header class="tv-top">
+  <h1 class="tv-brand"><img src="icons/icon.svg" alt="" width="44" height="44"><span>הסדרות שלי</span></h1>
+  <nav class="tv-tabs" id="tabs" aria-label="קטגוריות"></nav>
+  <button type="button" class="tv-btn" id="updateBtn" data-nav>עדכון מהטלפון</button>
+</header>
+<main id="main" class="tv-main"></main>
+<div class="tv-toast" id="toast" role="status" hidden></div>
+<script src="tvlink.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

@@ -7,6 +7,10 @@
 <meta name="description" content="מעקב צפייה אישי בסדרות">
 <meta name="theme-color" content="#f2f3f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14151c" media="(prefers-color-scheme: dark)">
+<script>
+// Android TV and other TV browsers go straight to the TV screen (add ?phone to stay here).
+if (/Android TV|GoogleTV|\bAFT|BRAVIA|SMART-?TV|Tizen|Web0S|\bTV Bro\b/i.test(navigator.userAgent) && !/[?&]phone\b/.test(location.search)) location.replace('tv.html');
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
@@ -47,6 +51,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
+<script src="tvlink.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

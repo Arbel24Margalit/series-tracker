@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId 'io.github.arbel.seriestv'
-        minSdk 24
+        minSdk 21
         targetSdk 34
         versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
         versionName '1.0'
@@ -19,6 +19,8 @@ android {
             storePassword System.getenv('KEYSTORE_PASS')
             keyAlias 'seriestv'
             keyPassword System.getenv('KEYSTORE_PASS')
+            enableV1Signing true
+            enableV2Signing true
         }
     }
     buildTypes {

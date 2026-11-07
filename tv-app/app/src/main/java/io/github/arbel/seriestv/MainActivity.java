@@ -1,12 +1,16 @@
 package io.github.arbel.seriestv;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -15,10 +19,21 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /*
  * "הסדרות שלי" for Android TV.
  * Shows the TV page of the series site. When a series link points to a
- * streaming service, it opens that service's TV app instead of a browser.
+ * streaming service, it opens that service's TV app. Any other link opens
+ * in the app's own watch screen (WatchActivity).
+ * On start it checks version.json on the site and offers to update itself.
  */
 public class MainActivity extends Activity {
 
@@ -55,6 +70,94 @@ public class MainActivity extends Activity {
         web.requestFocus(View.FOCUS_DOWN);
         if (state != null) web.restoreState(state);
         else web.loadUrl(HOME);
+        if (state == null) checkForUpdate();
+    }
+
+    /* ---------- Self-update ---------- */
+
+    private static final String VERSION_URL = "https://arbel24margalit.github.io/series-tracker/version.json";
+    private static final String APK_URL = "https://arbel24margalit.github.io/series-tracker/tv.apk";
+
+    private long installedVersion() {
+        try {
+            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return Build.VERSION.SDK_INT >= 28 ? pi.getLongVersionCode() : pi.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    private void checkForUpdate() {
+        // A file left from an earlier update is no longer needed.
+        new File(getCacheDir(), UpdateProvider.FILE).delete();
+        new Thread(() -> {
+            try {
+                HttpURLConnection c = (HttpURLConnection) new URL(VERSION_URL + "?t=" + System.currentTimeMillis()).openConnection();
+                c.setConnectTimeout(8000);
+                c.setReadTimeout(8000);
+                c.setUseCaches(false);
+                if (c.getResponseCode() != 200) return;
+                String text = new String(readAll(c.getInputStream()), "UTF-8");
+                long latest = new JSONObject(text).optLong("versionCode", 0);
+                if (latest > installedVersion()) runOnUiThread(this::offerUpdate);
+            } catch (Exception ignored) { /* no internet or no file: try next time */ }
+        }).start();
+    }
+
+    private void offerUpdate() {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("יש גרסה חדשה")
+                .setMessage("לעדכן את הסדרות שלי עכשיו?")
+                .setPositiveButton("עדכון", (d, w) -> downloadUpdate())
+                .setNegativeButton("לא עכשיו", null)
+                .show();
+    }
+
+    private void downloadUpdate() {
+        Toast.makeText(this, "מוריד עדכון…", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            File f = new File(getCacheDir(), UpdateProvider.FILE);
+            try {
+                HttpURLConnection c = (HttpURLConnection) new URL(APK_URL + "?t=" + System.currentTimeMillis()).openConnection();
+                c.setConnectTimeout(10000);
+                c.setReadTimeout(30000);
+                c.setUseCaches(false);
+                if (c.getResponseCode() != 200) throw new Exception("http " + c.getResponseCode());
+                try (FileOutputStream out = new FileOutputStream(f)) { out.write(readAll(c.getInputStream())); }
+                runOnUiThread(this::installUpdate);
+            } catch (Exception e) {
+                f.delete();
+                runOnUiThread(() -> Toast.makeText(this, "ההורדה נכשלה. ננסה בפעם הבאה.", Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
+    private void installUpdate() {
+        if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+            Toast.makeText(this, "צריך לאשר להסדרות שלי להתקין אפליקציות, ואז לחזור.", Toast.LENGTH_LONG).show();
+            tryStart(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName())));
+            return;
+        }
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= 24) {
+            i.setDataAndType(UpdateProvider.uri(), "application/vnd.android.package-archive");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+            File f = new File(getCacheDir(), UpdateProvider.FILE);
+            f.setReadable(true, false);
+            i.setDataAndType(Uri.fromFile(f), "application/vnd.android.package-archive");
+        }
+        if (!tryStart(i)) Toast.makeText(this, "לא הצלחתי לפתוח את ההתקנה.", Toast.LENGTH_LONG).show();
+    }
+
+    private static byte[] readAll(InputStream in) throws Exception {
+        try (InputStream is = in; ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[16384];
+            int n;
+            while ((n = is.read(buf)) > 0) out.write(buf, 0, n);
+            return out.toByteArray();
+        }
     }
 
     /** true = we handled it outside the WebView. */
@@ -93,10 +196,10 @@ public class MainActivity extends Activity {
                 return;
             }
         }
-        // 3. Whatever the TV uses for this link (another app or a browser).
-        if (tryStart(new Intent(Intent.ACTION_VIEW, uri))) return;
-        // 4. Last resort: show it here.
-        web.loadUrl(uri.toString());
+        // 3. Any other site: our own watch screen (full screen, ad blocking).
+        Intent w = new Intent(this, WatchActivity.class);
+        w.putExtra(WatchActivity.EXTRA_URL, uri.toString());
+        startActivity(w);
     }
 
     private boolean tryStart(Intent i) {

@@ -23,15 +23,21 @@ jobs:
         working-directory: tv-app
         env:
           VERSION_CODE: ${{ github.run_number }}
+          TV_KEYSTORE_B64: ${{ secrets.TV_KEYSTORE_B64 }}
+          TV_KEYSTORE_PASS: ${{ secrets.TV_KEYSTORE_PASS }}
         run: |
           set -o pipefail
           {
             echo "ANDROID_HOME=$ANDROID_HOME ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
             ls "${ANDROID_HOME:-/usr/local/lib/android/sdk}/platforms" || true
-            export KEYSTORE_PASS="$(openssl rand -hex 16)"
+            # One fixed signing key, kept in the repo's secrets, so updates install over the old app.
+            if [ -z "$TV_KEYSTORE_B64" ] || [ -z "$TV_KEYSTORE_PASS" ]; then
+              echo "Missing secrets TV_KEYSTORE_B64 / TV_KEYSTORE_PASS - the fixed signing key is not set up."
+              exit 1
+            fi
+            export KEYSTORE_PASS="$TV_KEYSTORE_PASS"
             export KEYSTORE_FILE="$RUNNER_TEMP/key.jks"
-            keytool -genkeypair -keystore "$KEYSTORE_FILE" -alias seriestv -keyalg RSA -keysize 2048 \
-              -validity 20000 -storepass "$KEYSTORE_PASS" -keypass "$KEYSTORE_PASS" -dname "CN=Series TV"
+            echo "$TV_KEYSTORE_B64" | base64 -d > "$KEYSTORE_FILE"
             curl -sSL -o "$RUNNER_TEMP/gradle.zip" https://services.gradle.org/distributions/gradle-8.14.3-bin.zip
             unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP"
             "$RUNNER_TEMP/gradle-8.14.3/bin/gradle" --no-daemon assembleRelease
@@ -40,10 +46,11 @@ jobs:
         if: success()
         run: |
           cp tv-app/app/build/outputs/apk/release/app-release.apk tv.apk
+          echo '{ "versionCode": ${{ github.run_number }}, "apk": "tv.apk" }' > version.json
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git rm -q --ignore-unmatch tv-app/build.log
-          git add tv.apk
+          git add tv.apk version.json
           git commit -m "Build TV app (run ${{ github.run_number }})" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main

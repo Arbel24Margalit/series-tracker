@@ -1,0 +1,477 @@
+ANDROID_HOME=/usr/local/lib/android/sdk ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+android-34
+android-34-ext10
+android-34-ext11
+android-34-ext12
+android-34-ext8
+android-35
+android-35-ext14
+android-35-ext15
+android-36
+android-36-ext18
+android-36-ext19
+android-36.1
+android-37.0
+android-37.1
+android-37.2
+android-37.2-beta1
+android-37.2-beta2
+android-37.2-beta3
+
+Welcome to Gradle 8.14.3!
+
+Here are the highlights of this release:
+ - Java 24 support
+ - GraalVM Native Image toolchain selection
+ - Enhancements to test reporting
+ - Build Authoring improvements
+
+For more details see https://docs.gradle.org/8.14.3/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred configuring root project 'SeriesTV'.
+> Could not resolve all artifacts for configuration 'classpath'.
+   > Could not find org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jetbrains/kotlin/kotlin-stdlib-jdk8/1.9.20/kotlin-stdlib-jdk8-1.9.20.pom
+       - https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-jdk8/1.9.20/kotlin-stdlib-jdk8-1.9.20.pom
+       - https://plugins.gradle.org/m2/org/jetbrains/kotlin/kotlin-stdlib-jdk8/1.9.20/kotlin-stdlib-jdk8-1.9.20.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:gradle-settings-api:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:repository:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:aaptcompiler:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:shared:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.lint:lint-model:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-emulator-control-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-retention-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder-model:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:gradle-api:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3 > com.android.tools:common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.analytics-library:tracker:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.build:manifest-merger:31.7.3
+   > Could not find org.apache.httpcomponents:httpmime:4.5.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/apache/httpcomponents/httpmime/4.5.6/httpmime-4.5.6.pom
+       - https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpmime/4.5.6/httpmime-4.5.6.pom
+       - https://plugins.gradle.org/m2/org/apache/httpcomponents/httpmime/4.5.6/httpmime-4.5.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdklib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:crash:31.7.3
+   > Could not find commons-io:commons-io:2.13.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/commons-io/commons-io/2.13.0/commons-io-2.13.0.pom
+       - https://repo.maven.apache.org/maven2/commons-io/commons-io/2.13.0/commons-io-2.13.0.pom
+       - https://plugins.gradle.org/m2/commons-io/commons-io/2.13.0/commons-io-2.13.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+   > Could not find org.ow2.asm:asm:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm/9.6/asm-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.lint:lint-typedef-remover:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:gradle-api:8.7.3
+   > Could not find org.ow2.asm:asm-analysis:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+   > Could not find org.ow2.asm:asm-commons:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+   > Could not find org.ow2.asm:asm-util:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-util/9.6/asm-util-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-util/9.6/asm-util-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm-util/9.6/asm-util-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+   > Could not find org.bouncycastle:bcpkix-jdk18on:1.77.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/bouncycastle/bcpkix-jdk18on/1.77/bcpkix-jdk18on-1.77.pom
+       - https://repo.maven.apache.org/maven2/org/bouncycastle/bcpkix-jdk18on/1.77/bcpkix-jdk18on-1.77.pom
+       - https://plugins.gradle.org/m2/org/bouncycastle/bcpkix-jdk18on/1.77/bcpkix-jdk18on-1.77.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.build:apkzlib:8.7.3
+   > Could not find org.glassfish.jaxb:jaxb-runtime:2.3.2.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/glassfish/jaxb/jaxb-runtime/2.3.2/jaxb-runtime-2.3.2.pom
+       - https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-runtime/2.3.2/jaxb-runtime-2.3.2.pom
+       - https://plugins.gradle.org/m2/org/glassfish/jaxb/jaxb-runtime/2.3.2/jaxb-runtime-2.3.2.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdklib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:repository:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+   > Could not find net.sf.jopt-simple:jopt-simple:4.9.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/net/sf/jopt-simple/jopt-simple/4.9/jopt-simple-4.9.pom
+       - https://repo.maven.apache.org/maven2/net/sf/jopt-simple/jopt-simple/4.9/jopt-simple-4.9.pom
+       - https://plugins.gradle.org/m2/net/sf/jopt-simple/jopt-simple/4.9/jopt-simple-4.9.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+   > Could not find com.squareup:javapoet:1.10.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/squareup/javapoet/1.10.0/javapoet-1.10.0.pom
+       - https://repo.maven.apache.org/maven2/com/squareup/javapoet/1.10.0/javapoet-1.10.0.pom
+       - https://plugins.gradle.org/m2/com/squareup/javapoet/1.10.0/javapoet-1.10.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+   > Could not find com.google.protobuf:protobuf-java:3.22.3.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/protobuf/protobuf-java/3.22.3/protobuf-java-3.22.3.pom
+       - https://repo.maven.apache.org/maven2/com/google/protobuf/protobuf-java/3.22.3/protobuf-java-3.22.3.pom
+       - https://plugins.gradle.org/m2/com/google/protobuf/protobuf-java/3.22.3/protobuf-java-3.22.3.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.ddms:ddmlib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:aapt2-proto:8.7.3-12006047
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:aaptcompiler:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-device-provider-ddmlib-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-device-provider-gradle-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-device-provider-profile-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-additional-test-output-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-coverage-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-emulator-control-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-logcat-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-apk-installer-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-host-retention-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:shared:31.7.3 > com.android.tools.analytics-library:protos:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.analytics-library:tracker:31.7.3
+   > Could not find com.google.protobuf:protobuf-java-util:3.22.3.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/protobuf/protobuf-java-util/3.22.3/protobuf-java-util-3.22.3.pom
+       - https://repo.maven.apache.org/maven2/com/google/protobuf/protobuf-java-util/3.22.3/protobuf-java-util-3.22.3.pom
+       - https://plugins.gradle.org/m2/com/google/protobuf/protobuf-java-util/3.22.3/protobuf-java-util-3.22.3.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+   > Could not find com.google.code.gson:gson:2.10.1.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+       - https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+       - https://plugins.gradle.org/m2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdklib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:shared:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.build:manifest-merger:31.7.3
+   > Could not find io.grpc:grpc-core:1.57.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/io/grpc/grpc-core/1.57.0/grpc-core-1.57.0.pom
+       - https://repo.maven.apache.org/maven2/io/grpc/grpc-core/1.57.0/grpc-core-1.57.0.pom
+       - https://plugins.gradle.org/m2/io/grpc/grpc-core/1.57.0/grpc-core-1.57.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+   > Could not find io.grpc:grpc-netty:1.57.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/io/grpc/grpc-netty/1.57.0/grpc-netty-1.57.0.pom
+       - https://repo.maven.apache.org/maven2/io/grpc/grpc-netty/1.57.0/grpc-netty-1.57.0.pom
+       - https://plugins.gradle.org/m2/io/grpc/grpc-netty/1.57.0/grpc-netty-1.57.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+   > Could not find io.grpc:grpc-protobuf:1.57.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/io/grpc/grpc-protobuf/1.57.0/grpc-protobuf-1.57.0.pom
+       - https://repo.maven.apache.org/maven2/io/grpc/grpc-protobuf/1.57.0/grpc-protobuf-1.57.0.pom
+       - https://plugins.gradle.org/m2/io/grpc/grpc-protobuf/1.57.0/grpc-protobuf-1.57.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+   > Could not find io.grpc:grpc-stub:1.57.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/io/grpc/grpc-stub/1.57.0/grpc-stub-1.57.0.pom
+       - https://repo.maven.apache.org/maven2/io/grpc/grpc-stub/1.57.0/grpc-stub-1.57.0.pom
+       - https://plugins.gradle.org/m2/io/grpc/grpc-stub/1.57.0/grpc-stub-1.57.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+   > Could not find com.google.crypto.tink:tink:1.7.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/crypto/tink/tink/1.7.0/tink-1.7.0.pom
+       - https://repo.maven.apache.org/maven2/com/google/crypto/tink/tink/1.7.0/tink-1.7.0.pom
+       - https://plugins.gradle.org/m2/com/google/crypto/tink/tink/1.7.0/tink-1.7.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+   > Could not find com.google.flatbuffers:flatbuffers-java:1.12.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/flatbuffers/flatbuffers-java/1.12.0/flatbuffers-java-1.12.0.pom
+       - https://repo.maven.apache.org/maven2/com/google/flatbuffers/flatbuffers-java/1.12.0/flatbuffers-java-1.12.0.pom
+       - https://plugins.gradle.org/m2/com/google/flatbuffers/flatbuffers-java/1.12.0/flatbuffers-java-1.12.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+   > Could not find org.tensorflow:tensorflow-lite-metadata:0.1.0-rc2.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/tensorflow/tensorflow-lite-metadata/0.1.0-rc2/tensorflow-lite-metadata-0.1.0-rc2.pom
+       - https://repo.maven.apache.org/maven2/org/tensorflow/tensorflow-lite-metadata/0.1.0-rc2/tensorflow-lite-metadata-0.1.0-rc2.pom
+       - https://plugins.gradle.org/m2/org/tensorflow/tensorflow-lite-metadata/0.1.0-rc2/tensorflow-lite-metadata-0.1.0-rc2.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3
+   > Could not find com.google.guava:guava:32.0.1-jre.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/guava/guava/32.0.1-jre/guava-32.0.1-jre.pom
+       - https://repo.maven.apache.org/maven2/com/google/guava/guava/32.0.1-jre/guava-32.0.1-jre.pom
+       - https://plugins.gradle.org/m2/com/google/guava/guava/32.0.1-jre/guava-32.0.1-jre.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:aaptcompiler:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:crash:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:shared:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.lint:lint-typedef-remover:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder-test-api:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:gradle-api:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3 > com.android.tools:common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.analytics-library:tracker:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.build:apkzlib:8.7.3
+   > Could not find javax.inject:javax.inject:1.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/javax/inject/javax.inject/1/javax.inject-1.pom
+       - https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom
+       - https://plugins.gradle.org/m2/javax/inject/javax.inject/1/javax.inject-1.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+   > Could not find net.sf.kxml:kxml2:2.3.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/net/sf/kxml/kxml2/2.3.0/kxml2-2.3.0.pom
+       - https://repo.maven.apache.org/maven2/net/sf/kxml/kxml2/2.3.0/kxml2-2.3.0.pom
+       - https://plugins.gradle.org/m2/net/sf/kxml/kxml2/2.3.0/kxml2-2.3.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.ddms:ddmlib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.lint:lint-model:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.layoutlib:layoutlib-api:31.7.3
+   > Could not find org.bouncycastle:bcprov-jdk18on:1.77.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/bouncycastle/bcprov-jdk18on/1.77/bcprov-jdk18on-1.77.pom
+       - https://repo.maven.apache.org/maven2/org/bouncycastle/bcprov-jdk18on/1.77/bcprov-jdk18on-1.77.pom
+       - https://plugins.gradle.org/m2/org/bouncycastle/bcprov-jdk18on/1.77/bcprov-jdk18on-1.77.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.build:apkzlib:8.7.3
+   > Could not find org.jetbrains.intellij.deps:trove4j:1.0.20200330.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jetbrains/intellij/deps/trove4j/1.0.20200330/trove4j-1.0.20200330.pom
+       - https://repo.maven.apache.org/maven2/org/jetbrains/intellij/deps/trove4j/1.0.20200330/trove4j-1.0.20200330.pom
+       - https://plugins.gradle.org/m2/org/jetbrains/intellij/deps/trove4j/1.0.20200330/trove4j-1.0.20200330.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+   > Could not find org.jetbrains.kotlin:kotlin-reflect:1.9.20.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jetbrains/kotlin/kotlin-reflect/1.9.20/kotlin-reflect-1.9.20.pom
+       - https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-reflect/1.9.20/kotlin-reflect-1.9.20.pom
+       - https://plugins.gradle.org/m2/org/jetbrains/kotlin/kotlin-reflect/1.9.20/kotlin-reflect-1.9.20.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3
+   > Could not find org.apache.commons:commons-compress:1.21.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.pom
+       - https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.pom
+       - https://plugins.gradle.org/m2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdklib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:repository:31.7.3
+   > Could not find org.apache.httpcomponents:httpcore:4.4.16.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.pom
+       - https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.pom
+       - https://plugins.gradle.org/m2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdklib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:crash:31.7.3
+   > Could not find com.google.jimfs:jimfs:1.1.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/jimfs/jimfs/1.1/jimfs-1.1.pom
+       - https://repo.maven.apache.org/maven2/com/google/jimfs/jimfs/1.1/jimfs-1.1.pom
+       - https://plugins.gradle.org/m2/com/google/jimfs/jimfs/1.1/jimfs-1.1.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:repository:31.7.3
+   > Could not find com.sun.activation:javax.activation:1.2.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/sun/activation/javax.activation/1.2.0/javax.activation-1.2.0.pom
+       - https://repo.maven.apache.org/maven2/com/sun/activation/javax.activation/1.2.0/javax.activation-1.2.0.pom
+       - https://plugins.gradle.org/m2/com/sun/activation/javax.activation/1.2.0/javax.activation-1.2.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:repository:31.7.3
+   > Could not find org.jetbrains:annotations:23.0.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.pom
+       - https://repo.maven.apache.org/maven2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.pom
+       - https://plugins.gradle.org/m2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.ddms:ddmlib:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.layoutlib:layoutlib-api:31.7.3
+   > Could not find org.apache.httpcomponents:httpclient:4.5.14.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.pom
+       - https://repo.maven.apache.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.pom
+       - https://plugins.gradle.org/m2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:crash:31.7.3
+   > Could not find net.java.dev.jna:jna-platform:5.6.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/net/java/dev/jna/jna-platform/5.6.0/jna-platform-5.6.0.pom
+       - https://repo.maven.apache.org/maven2/net/java/dev/jna/jna-platform/5.6.0/jna-platform-5.6.0.pom
+       - https://plugins.gradle.org/m2/net/java/dev/jna/jna-platform/5.6.0/jna-platform-5.6.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.analytics-library:shared:31.7.3
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools:sdk-common:31.7.3 > com.android.tools:common:31.7.3
+   > Could not find com.googlecode.juniversalchardet:juniversalchardet:1.0.3.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/googlecode/juniversalchardet/juniversalchardet/1.0.3/juniversalchardet-1.0.3.pom
+       - https://repo.maven.apache.org/maven2/com/googlecode/juniversalchardet/juniversalchardet/1.0.3/juniversalchardet-1.0.3.pom
+       - https://plugins.gradle.org/m2/com/googlecode/juniversalchardet/juniversalchardet/1.0.3/juniversalchardet-1.0.3.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > androidx.databinding:databinding-compiler-common:8.7.3
+   > Could not find javax.annotation:javax.annotation-api:1.3.2.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.pom
+       - https://repo.maven.apache.org/maven2/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.pom
+       - https://plugins.gradle.org/m2/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:31.7.3
+   > Could not find com.google.auto.value:auto-value-annotations:1.6.2.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/auto/value/auto-value-annotations/1.6.2/auto-value-annotations-1.6.2.pom
+       - https://repo.maven.apache.org/maven2/com/google/auto/value/auto-value-annotations/1.6.2/auto-value-annotations-1.6.2.pom
+       - https://plugins.gradle.org/m2/com/google/auto/value/auto-value-annotations/1.6.2/auto-value-annotations-1.6.2.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+   > Could not find com.google.errorprone:error_prone_annotations:2.3.1.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/errorprone/error_prone_annotations/2.3.1/error_prone_annotations-2.3.1.pom
+       - https://repo.maven.apache.org/maven2/com/google/errorprone/error_prone_annotations/2.3.1/error_prone_annotations-2.3.1.pom
+       - https://plugins.gradle.org/m2/com/google/errorprone/error_prone_annotations/2.3.1/error_prone_annotations-2.3.1.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+   > Could not find com.google.dagger:dagger:2.28.3.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/dagger/dagger/2.28.3/dagger-2.28.3.pom
+       - https://repo.maven.apache.org/maven2/com/google/dagger/dagger/2.28.3/dagger-2.28.3.pom
+       - https://plugins.gradle.org/m2/com/google/dagger/dagger/2.28.3/dagger-2.28.3.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+   > Could not find org.bitbucket.b_c:jose4j:0.9.5.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/bitbucket/b_c/jose4j/0.9.5/jose4j-0.9.5.pom
+       - https://repo.maven.apache.org/maven2/org/bitbucket/b_c/jose4j/0.9.5/jose4j-0.9.5.pom
+       - https://plugins.gradle.org/m2/org/bitbucket/b_c/jose4j/0.9.5/jose4j-0.9.5.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+   > Could not find org.slf4j:slf4j-api:1.7.30.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.pom
+       - https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.pom
+       - https://plugins.gradle.org/m2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:bundletool:1.17.1
+   > Could not find com.google.code.gson:gson:2.10.1.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+       - https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+       - https://plugins.gradle.org/m2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-core:1.0.0-beta10
+   > Could not find org.jetbrains.kotlin:kotlin-stdlib:1.3.71.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.3.71/kotlin-stdlib-1.3.71.pom
+       - https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.3.71/kotlin-stdlib-1.3.71.pom
+       - https://plugins.gradle.org/m2/org/jetbrains/kotlin/kotlin-stdlib/1.3.71/kotlin-stdlib-1.3.71.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-core:1.0.0-beta10
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.ow2.asm:asm:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm/9.6/asm-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.ow2.asm:asm-util:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-util/9.6/asm-util-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-util/9.6/asm-util-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm-util/9.6/asm-util-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.ow2.asm:asm-commons:9.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.pom
+       - https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.pom
+       - https://plugins.gradle.org/m2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find org.jdom:jdom2:2.0.6.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/org/jdom/jdom2/2.0.6/jdom2-2.0.6.pom
+       - https://repo.maven.apache.org/maven2/org/jdom/jdom2/2.0.6/jdom2-2.0.6.pom
+       - https://plugins.gradle.org/m2/org/jdom/jdom2/2.0.6/jdom2-2.0.6.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10
+   > Could not find commons-codec:commons-codec:1.10.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/commons-codec/commons-codec/1.10/commons-codec-1.10.pom
+       - https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.10/commons-codec-1.10.pom
+       - https://plugins.gradle.org/m2/commons-codec/commons-codec/1.10/commons-codec-1.10.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+   > Could not find com.squareup:javawriter:2.5.0.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
+       - https://repo.maven.apache.org/maven2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
+       - https://plugins.gradle.org/m2/com/squareup/javawriter/2.5.0/javawriter-2.5.0.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3
+   > Could not find com.google.code.findbugs:jsr305:3.0.2.
+     Searched in the following locations:
+       - https://dl.google.com/dl/android/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom
+       - https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom
+       - https://plugins.gradle.org/m2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.pom
+     Required by:
+         root project : > com.android.application:com.android.application.gradle.plugin:8.7.3 > com.android.tools.build:gradle:8.7.3 > com.android.tools.build:builder:8.7.3 > com.android.tools.build:apkzlib:8.7.3
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 7s

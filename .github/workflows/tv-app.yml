@@ -64,3 +64,4 @@ jobs:
           git commit -m "TV app build failed (run ${{ github.run_number }}) [skip ci]"
           git pull --rebase origin main
           git push origin HEAD:main
+# rebuild: Nov 21, 2026

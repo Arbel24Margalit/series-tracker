@@ -15,6 +15,10 @@
         <package android:name="com.amazon.amazonvideo.livingroom" />
         <package android:name="com.wbd.stream" />
         <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+        <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
         </intent>

@@ -10,6 +10,9 @@ const TV_KEY = 'seriesTracker.tv.v1';
 const $ = (sel, root = document) => root.querySelector(sel);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const isLink = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u);
+// A series marked as yes with no pasted link: the TV app opens the yes app for it.
+const isYes = (s) => /^\s*(yes|יס)/i.test(String(s.platform || ''));
+const linkFor = (s) => (isLink(s.url) ? s.url : (isYes(s) ? 'https://www.yes.co.il/' : ''));
 
 let tv = load();
 let screen = tv.data ? 'grid' : 'pair';
@@ -74,7 +77,7 @@ function cardHTML(s, i) {
       <div class="tv-poster">
         ${s.img ? `<img src="${esc(s.img)}" alt="" loading="lazy">` : esc(title)}
         ${s.season ? `<span class="tv-badge">S${s.season}</span>` : ''}
-        ${isLink(s.url) ? '' : '<span class="tv-nolink">אין קישור</span>'}
+        ${linkFor(s) ? '' : '<span class="tv-nolink">אין קישור</span>'}
       </div>
       <div class="tv-title">${esc(title)}</div>
       ${meta ? `<div class="tv-meta">${esc(meta)}</div>` : ''}
@@ -185,7 +188,7 @@ document.addEventListener('click', (e) => {
     const s = showsFor(tv.tab)[+card.dataset.i];
     if (!s) return;
     sessionStorage.setItem('tvFocus:' + tv.tab, card.dataset.i);
-    if (isLink(s.url)) location.href = s.url;
+    if (linkFor(s)) location.href = linkFor(s);
     else toast('אין קישור לסדרה הזו. מוסיפים קישור באפליקציה בטלפון ושולחים שוב.', 5000);
     return;
   }

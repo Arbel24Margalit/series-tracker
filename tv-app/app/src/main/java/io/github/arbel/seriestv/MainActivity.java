@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -191,8 +192,13 @@ public class MainActivity extends Activity {
             PackageManager pm = getPackageManager();
             Intent home = pm.getLeanbackLaunchIntentForPackage(pkg);
             if (home == null) home = pm.getLaunchIntentForPackage(pkg);
+            if (home == null && pkg.equals("il.co.yes.yesplus")) home = findYesApp();
             if (home != null && tryStart(home)) {
                 Toast.makeText(this, "פתחתי את האפליקציה. חפש בה את הסדרה.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (pkg.equals("il.co.yes.yesplus")) {
+                Toast.makeText(this, "לא מצאתי את אפליקציית yes בסטרימר הזה.", Toast.LENGTH_LONG).show();
                 return;
             }
         }
@@ -202,6 +208,23 @@ public class MainActivity extends Activity {
         Intent w = new Intent(this, WatchActivity.class);
         w.putExtra(WatchActivity.EXTRA_URL, uri.toString());
         startActivity(w);
+    }
+
+    /** The yes app on a yes streamer may have another name than the store one. */
+    private Intent findYesApp() {
+        PackageManager pm = getPackageManager();
+        Intent q = new Intent(Intent.ACTION_MAIN);
+        q.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        for (ResolveInfo r : pm.queryIntentActivities(q, 0)) {
+            String p = r.activityInfo.packageName;
+            if (p.equals(getPackageName())) continue;
+            String label = String.valueOf(r.loadLabel(pm)).toLowerCase();
+            if (p.startsWith("il.co.yes") || label.startsWith("yes")) {
+                Intent i = pm.getLeanbackLaunchIntentForPackage(p);
+                if (i != null) return i;
+            }
+        }
+        return null;
     }
 
     private boolean tryStart(Intent i) {

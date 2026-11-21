@@ -32,7 +32,7 @@ import java.net.URL;
  * "הסדרות שלי" for Android TV.
  * Shows the TV page of the series site. When a series link points to a
  * streaming service, it opens that service's TV app. Any other link opens
- * in the app's own watch screen (WatchActivity).
+ * in the TV's browser; only if there is none, in our watch screen.
  * On start it checks version.json on the site and offers to update itself.
  */
 public class MainActivity extends Activity {
@@ -196,7 +196,9 @@ public class MainActivity extends Activity {
                 return;
             }
         }
-        // 3. Any other site: our own watch screen (full screen, ad blocking).
+        // 3. Any other site: the TV's own browser (e.g. TV Bro).
+        if (tryStart(new Intent(Intent.ACTION_VIEW, uri))) return;
+        // 4. No browser on the TV: our own watch screen.
         Intent w = new Intent(this, WatchActivity.class);
         w.putExtra(WatchActivity.EXTRA_URL, uri.toString());
         startActivity(w);

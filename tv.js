@@ -18,7 +18,12 @@ const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const isLink = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u);
 // A series marked as yes with no pasted link: the TV app opens the yes app for it.
 const isYes = (s) => /^\s*(yes|יס)/i.test(String(s.platform || ''));
-const linkFor = (s) => (isLink(s.url) ? s.url : (isYes(s) ? 'https://www.yes.co.il/' : ''));
+// A series marked as YouTube with no pasted link: the TV app opens the YouTube app (search there).
+const isYouTube = (s) => /^\s*(youtube|יוטיוב)/i.test(String(s.platform || ''));
+const linkFor = (s) => (isLink(s.url) ? s.url
+  : isYes(s) ? 'https://www.yes.co.il/'
+  : isYouTube(s) ? 'https://www.youtube.com/'
+  : '');
 
 let tv = load();
 let screen = tv.data ? 'grid' : 'pair';

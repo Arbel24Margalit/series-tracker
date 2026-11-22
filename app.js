@@ -78,9 +78,9 @@ const STRINGS = {
     lastBackup: 'גיבוי אחרון: {0}', neverBackedUp: 'עוד לא נשמר גיבוי',
     importConfirm: 'השחזור יחליף את כל הרשימה הנוכחית ({0} סדרות) בתוכן הקובץ ({1} סדרות). להמשיך?',
     replace: 'החלפה', imported: 'הרשימה שוחזרה מהקובץ', badFile: 'זה לא קובץ גיבוי של האתר.',
-    tv: 'טלוויזיה', tvHint: 'בטלוויזיה פותחים בדפדפן את האתר עם /tv.html בסוף הכתובת, ומקלידים כאן את הקוד שמופיע שם. אחרי שינויים בטלפון לוחצים שוב "שליחה לטלוויזיה", ובטלוויזיה "עדכון מהטלפון".',
-    tvCode: 'הקוד מהטלוויזיה', tvSend: 'שליחה לטלוויזיה', tvSending: 'שולח…', tvSent: 'נשלח! בטלוויזיה לוחצים "עדכון מהטלפון"',
-    tvBadCode: 'הקוד לא תקין. צריך 8 תווים, כמו K7P2-QM9X', tvFailed: 'השליחה נכשלה. בדוק שיש אינטרנט ונסה שוב.', tvOpen: 'פתיחת מסך הטלוויזיה כאן',
+    tv: 'טלוויזיה', tvHint: 'מקלידים כאן את הקוד שמופיע בכל טלוויזיה (לכמה טלוויזיות: כל הקודים, עם רווח ביניהם) ולוחצים פעם אחת "שליחה לטלוויזיה". מאז הרשימה עוברת לבד לכל הטלוויזיות בכל פעם שפותחים את האפליקציה או משנים משהו.',
+    tvCode: 'הקודים מהטלוויזיות', tvSend: 'שליחה לטלוויזיה', tvSending: 'שולח…', tvSent: 'נשלח! מעכשיו זה יעבור לטלוויזיות לבד',
+    tvBadCode: 'קוד לא תקין. כל קוד הוא 8 תווים, כמו K7P2-QM9X', tvFailed: 'השליחה נכשלה. בדוק שיש אינטרנט ונסה שוב.', tvOpen: 'פתיחת מסך הטלוויזיה כאן',
     exported: 'קובץ הגיבוי נשמר', storageError: 'השמירה נכשלה: הזיכרון של הדפדפן מלא. אפשר לפנות מקום בהסרת תמונות שהועלו מהטלפון.',
     imageTooBig: 'לא ניתן לקרוא את התמונה. אפשר לנסות תמונה אחרת.',
     about: 'על האתר', aboutText: 'מעקב צפייה אישי, בלי חשבון ובלי שרת. הכול נשמר במכשיר.',
@@ -156,9 +156,9 @@ const STRINGS = {
     lastBackup: 'Last backup: {0}', neverBackedUp: 'No backup saved yet',
     importConfirm: 'Restoring replaces your whole current list ({0} series) with the file’s content ({1} series). Continue?',
     replace: 'Replace', imported: 'List restored from file', badFile: 'This file isn’t a backup from this site.',
-    tv: 'TV', tvHint: 'On the TV, open this site in the browser with /tv.html at the end of the address, and type the code shown there here. After changes on the phone, tap "Send to TV" again, then "Update from phone" on the TV.',
-    tvCode: 'Code from the TV', tvSend: 'Send to TV', tvSending: 'Sending…', tvSent: 'Sent! On the TV, press "Update from phone"',
-    tvBadCode: 'That code isn’t valid. It has 8 characters, like K7P2-QM9X', tvFailed: 'Sending failed. Check the internet connection and try again.', tvOpen: 'Open the TV screen here',
+    tv: 'TV', tvHint: 'Type the code shown on each TV here (several TVs: all the codes, with spaces between) and tap "Send to TV" once. From then on the list goes to every TV by itself whenever you open the app or change something.',
+    tvCode: 'Codes from the TVs', tvSend: 'Send to TV', tvSending: 'Sending…', tvSent: 'Sent! From now on it reaches the TVs by itself',
+    tvBadCode: 'A code isn’t valid. Each code has 8 characters, like K7P2-QM9X', tvFailed: 'Sending failed. Check the internet connection and try again.', tvOpen: 'Open the TV screen here',
     exported: 'Backup file saved', storageError: 'Saving failed – browser storage is full. Try removing images uploaded from the phone.',
     imageTooBig: 'Couldn’t read that image. Try another one.',
     about: 'About', aboutText: 'A personal watch tracker. No account and no server – everything stays on your device.',
@@ -439,6 +439,8 @@ function normalizeState(raw) {
     })),
     lastBackup: Number.isFinite(raw.lastBackup) ? raw.lastBackup : null,
     tvCode: typeof raw.tvCode === 'string' ? raw.tvCode : '',
+    tvLastHash: typeof raw.tvLastHash === 'string' ? raw.tvLastHash : '',
+    tvLastSent: Number.isFinite(raw.tvLastSent) ? raw.tvLastSent : 0,
     swipeHintShown: raw.swipeHintShown === true,
     platforms, statuses, shows,
   };
@@ -454,6 +456,7 @@ function load() {
 function save() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    if (typeof scheduleTvSync === 'function') scheduleTvSync();
     return true;
   } catch (e) {
     toast(T('storageError'), 6000);
@@ -1869,16 +1872,61 @@ function tvPayload() {
     }),
   };
 }
+// One code per TV, separated by spaces/commas. Returns null if any code is bad.
+function tvCodesFrom(text) {
+  const parts = String(text || '').split(/[\s,;]+/).filter(Boolean);
+  const codes = parts.map((p) => TvLink.cleanCode(p));
+  if (codes.some((c) => !c)) return null;
+  return [...new Set(codes)];
+}
+// The list without the send time, so we can tell whether anything changed.
+function tvHash(payload) {
+  const { sentAt, ...rest } = payload;
+  return JSON.stringify(rest);
+}
+let tvSyncing = false;
+async function sendToAllTvs(codes) {
+  tvSyncing = true;
+  try {
+    const payload = tvPayload();
+    for (const code of codes) await TvLink.send(code, payload);
+    state.tvLastHash = tvHash(payload);
+    state.tvLastSent = payload.sentAt;
+    save();
+  } finally {
+    tvSyncing = false;
+  }
+}
+
+/* Automatic: send the list to every saved TV when the app opens, when it
+   comes back to the screen, and a few seconds after any change. Skips if
+   nothing changed (but refreshes every 6 hours, since the relay forgets
+   after 12). */
+const TV_REFRESH_MS = 6 * 60 * 60 * 1000;
+let tvSyncTimer = null;
+function scheduleTvSync(delay = 4000) {
+  clearTimeout(tvSyncTimer);
+  tvSyncTimer = setTimeout(autoSyncTv, delay);
+}
+async function autoSyncTv() {
+  if (tvSyncing || !state || document.hidden || navigator.onLine === false) return;
+  const codes = tvCodesFrom(state.tvCode);
+  if (!codes || !codes.length) return;
+  const changed = tvHash(tvPayload()) !== state.tvLastHash;
+  if (!changed && Date.now() - (state.tvLastSent || 0) < TV_REFRESH_MS) return;
+  try { await sendToAllTvs(codes); } catch (err) { /* quiet: next open tries again */ }
+}
+
 async function sendToTv(btn, body) {
   const input = $('#tvCodeInput', body);
-  const code = TvLink.cleanCode(input.value);
-  if (!code) { toast(T('tvBadCode'), 5000); input.focus(); return; }
-  input.value = code;
-  state.tvCode = code; save();
+  const codes = tvCodesFrom(input.value);
+  if (!codes || !codes.length) { toast(T('tvBadCode'), 5000); input.focus(); return; }
+  input.value = codes.join(' ');
+  state.tvCode = input.value; save();
   const label = btn.innerHTML;
   btn.disabled = true; btn.textContent = T('tvSending');
   try {
-    await TvLink.send(code, tvPayload());
+    await sendToAllTvs(codes);
     toast(T('tvSent'), 6000);
   } catch (err) {
     toast(T('tvFailed'), 6000);
@@ -1921,7 +1969,7 @@ function openSettings() {
         <h3>${esc(T('tv'))}</h3>
         <span class="hint">${esc(T('tvHint'))}</span>
         <label class="hint" for="tvCodeInput">${esc(T('tvCode'))}</label>
-        <input id="tvCodeInput" class="input ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7P2-QM9X" maxlength="12" value="${esc(state.tvCode)}">
+        <input id="tvCodeInput" class="input ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7P2-QM9X ABCD-EFGH" maxlength="80" value="${esc(state.tvCode)}">
         <button type="button" class="btn primary" data-tv-send>${icon('play')}${esc(T('tvSend'))}</button>
         <a class="btn small" href="tv.html">${esc(T('tvOpen'))}</a>
       </section>
@@ -2223,7 +2271,9 @@ function init() {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   requestAnimationFrame(restoreScroll);
   window.addEventListener('scroll', debounce(saveScroll, 200), { passive: true });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) saveScroll(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveScroll(); else scheduleTvSync(500); });
+  window.addEventListener('online', () => scheduleTvSync(500));
+  scheduleTvSync(800); // opening the app sends the list to the TVs
   window.addEventListener('pagehide', saveScroll);
 
   $('#chips').addEventListener('click', (e) => {

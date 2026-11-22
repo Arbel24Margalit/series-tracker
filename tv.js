@@ -113,6 +113,13 @@ async function check({ quiet = false } = {}) {
       if (!quiet) toast('הרשימה כבר מעודכנת.');
       return 'same';
     }
+    // The phone re-sends now and then even with no change: don't redraw for that.
+    const body = (d) => JSON.stringify({ ...d, sentAt: 0 });
+    if (tv.data && screen === 'grid' && body(p) === body(tv.data)) {
+      tv.data = p; save();
+      if (!quiet) toast('הרשימה כבר מעודכנת.');
+      return 'same';
+    }
     tv.data = p; save();
     screen = 'grid';
     render(); focusFirst();
@@ -200,7 +207,11 @@ document.addEventListener('click', (e) => {
 });
 
 // Coming back with the remote's Back button may restore this page from cache.
-window.addEventListener('pageshow', () => { if (screen === 'grid') focusFirst(); });
+window.addEventListener('pageshow', () => { if (screen === 'grid') { focusFirst(); check({ quiet: true }); } });
+// Back on screen (e.g. returning from a show): look for a newer list.
+document.addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'grid') check({ quiet: true }); });
+// While the list is showing, quietly check for updates from the phone every 20 seconds.
+setInterval(() => { if (!document.hidden && screen === 'grid') check({ quiet: true }); }, 20000);
 
 save();
 render();

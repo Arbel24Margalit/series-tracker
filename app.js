@@ -1863,7 +1863,7 @@ function tvPayload() {
     shows: state.shows.map((s) => {
       const target = watchTarget(s);
       return {
-        title: s.title, alt: s.altTitle, status: s.status, fav: s.favorite,
+        id: s.id, title: s.title, alt: s.altTitle, status: s.status, fav: s.favorite,
         season: s.season, platform: s.platform, updated: s.updatedAt,
         // Uploaded photos are too big to send; links to posters are fine.
         img: /^https:\/\//i.test(s.image) ? s.image : '',
@@ -1908,10 +1908,45 @@ function scheduleTvSync(delay = 4000) {
   clearTimeout(tvSyncTimer);
   tvSyncTimer = setTimeout(autoSyncTv, delay);
 }
+/* Category changes made on a TV come back through the relay. A change wins
+   only if it's newer than the last edit of that series on the phone. */
+async function pullTvChanges(codes) {
+  const changes = [];
+  for (const code of codes) {
+    try {
+      for (const m of await TvLink.receiveBack(code)) {
+        const list = m.payload && Array.isArray(m.payload.changes) ? m.payload.changes : [];
+        changes.push(...list);
+      }
+    } catch (err) { /* that TV's channel is unreachable now: next time */ }
+  }
+  changes.sort((a, b) => (a.at || 0) - (b.at || 0));
+  const applied = [];
+  for (const c of changes) {
+    const show = state.shows.find((x) => x.id === c.id);
+    if (!show || !Number.isFinite(c.at) || c.at <= (show.updatedAt || 0)) continue;
+    if (!state.statuses.some((st) => st.id === c.status) || show.status === c.status) continue;
+    show.status = c.status;
+    show.updatedAt = Math.max(c.at, Date.now());
+    applied.push(show);
+  }
+  if (applied.length) {
+    save();
+    renderList();
+    const st = state.statuses.find((x) => x.id === applied[applied.length - 1].status);
+    const name = st ? (state.lang === 'en' ? (st.en || st.he) : (st.he || st.en)) : '';
+    toast(applied.length === 1
+      ? (state.lang === 'en' ? `From the TV: "${applied[0].title}" → ${name}` : `מהטלוויזיה: "${applied[0].title}" עברה ל${name}`)
+      : (state.lang === 'en' ? `${applied.length} changes came from the TV` : `${applied.length} שינויים הגיעו מהטלוויזיה`), 5000);
+  }
+}
+let tvPulling = false;
 async function autoSyncTv() {
-  if (tvSyncing || !state || document.hidden || navigator.onLine === false) return;
+  if (tvSyncing || tvPulling || !state || document.hidden || navigator.onLine === false) return;
   const codes = tvCodesFrom(state.tvCode);
   if (!codes || !codes.length) return;
+  tvPulling = true;
+  try { await pullTvChanges(codes); } finally { tvPulling = false; }
   const changed = tvHash(tvPayload()) !== state.tvLastHash;
   if (!changed && Date.now() - (state.tvLastSent || 0) < TV_REFRESH_MS) return;
   try { await sendToAllTvs(codes); } catch (err) { /* quiet: next open tries again */ }
@@ -2274,6 +2309,8 @@ function init() {
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveScroll(); else scheduleTvSync(500); });
   window.addEventListener('online', () => scheduleTvSync(500));
   scheduleTvSync(800); // opening the app sends the list to the TVs
+  // While open, look for category changes made on a TV every minute.
+  setInterval(() => { if (!document.hidden) scheduleTvSync(0); }, 60000);
   window.addEventListener('pagehide', saveScroll);
 
   $('#chips').addEventListener('click', (e) => {

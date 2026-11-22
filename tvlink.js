@@ -26,8 +26,9 @@ const TvLink = (() => {
     return s.slice(0, 4) + '-' + s.slice(4);
   }
 
-  async function topicFor(code) {
-    const h = await crypto.subtle.digest('SHA-256', enc.encode('my-series-topic:' + code));
+  // kind '' = phone → TV (the list); kind 'back' = TV → phone (category changes made on the TV).
+  async function topicFor(code, kind = '') {
+    const h = await crypto.subtle.digest('SHA-256', enc.encode('my-series-topic:' + (kind ? kind + ':' : '') + code));
     return 'myseries-' + Array.from(new Uint8Array(h).slice(0, 12), (x) => x.toString(16).padStart(2, '0')).join('');
   }
   async function keyFor(code) {
@@ -47,7 +48,7 @@ const TvLink = (() => {
   const canZip = typeof CompressionStream === 'function' && typeof DecompressionStream === 'function';
 
   // The TV only needs what it shows and the link ▶ opens.
-  async function send(code, payload) {
+  async function send(code, payload, kind = '') {
     let data = enc.encode(JSON.stringify(payload));
     let flag = 'p';
     if (canZip) { data = await pipe(data, CompressionStream); flag = 'z'; }
@@ -58,7 +59,7 @@ const TvLink = (() => {
     for (let i = 0; i < blob.length; i += CHUNK) parts.push(blob.slice(i, i + CHUNK));
     if (parts.length > 40) throw new Error('too-big');
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    const topic = await topicFor(code);
+    const topic = await topicFor(code, kind);
     for (let i = 0; i < parts.length; i++) {
       const res = await fetch(RELAY + topic, { method: 'POST', body: `${id}|${i}|${parts.length}|${parts[i]}` });
       if (!res.ok) throw new Error('relay-' + res.status);
@@ -66,9 +67,9 @@ const TvLink = (() => {
     return parts.length;
   }
 
-  // Returns the newest complete list sent to this code in the last 12 hours, or null.
-  async function receive(code) {
-    const topic = await topicFor(code);
+  // All complete messages sent to this code (and kind) in the last 12 hours, newest first.
+  async function receiveAll(code, kind = '') {
+    const topic = await topicFor(code, kind);
     const res = await fetch(`${RELAY}${topic}/json?poll=1&since=12h`, { cache: 'no-store' });
     if (!res.ok) throw new Error('relay-' + res.status);
     const lines = (await res.text()).split('\n').filter(Boolean);
@@ -87,15 +88,29 @@ const TvLink = (() => {
     const done = [...sets.entries()]
       .filter(([, s]) => s.parts.filter(Boolean).length === s.n)
       .sort((a, b) => b[1].time - a[1].time);
-    if (!done.length) return null;
-    const [id, s] = done[0];
-    const blob = s.parts.join('');
-    const flag = blob[0];
-    const [ivB, ctB] = blob.slice(1).split('.');
-    let data = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(ivB) }, await keyFor(code), fromB64(ctB)));
-    if (flag === 'z') data = await pipe(data, DecompressionStream);
-    return { id, time: s.time * 1000, payload: JSON.parse(dec.decode(data)) };
+    const out = [];
+    for (const [id, s] of done) {
+      try {
+        const blob = s.parts.join('');
+        const flag = blob[0];
+        const [ivB, ctB] = blob.slice(1).split('.');
+        let data = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(ivB) }, await keyFor(code), fromB64(ctB)));
+        if (flag === 'z') data = await pipe(data, DecompressionStream);
+        out.push({ id, time: s.time * 1000, payload: JSON.parse(dec.decode(data)) });
+      } catch (e) { /* not ours or damaged: skip */ }
+    }
+    return out;
   }
 
-  return { newCode, cleanCode, send, receive };
+  // The newest complete list sent to this code in the last 12 hours, or null.
+  async function receive(code) {
+    const all = await receiveAll(code);
+    return all[0] || null;
+  }
+
+  // TV → phone: category changes made with the remote.
+  const sendBack = (code, payload) => send(code, payload, 'back');
+  const receiveBack = (code) => receiveAll(code, 'back');
+
+  return { newCode, cleanCode, send, receive, sendBack, receiveBack };
 })();

@@ -14,10 +14,12 @@
 <body>
 <header class="tv-top">
   <h1 class="tv-brand"><img src="icons/icon.svg" alt="" width="44" height="44"><span>הסדרות שלי</span></h1>
-  <nav class="tv-tabs" id="tabs" aria-label="קטגוריות"></nav>
+  <p class="tv-hint" id="hint" hidden><b>OK</b> צפייה · <b>החזקת OK</b> העברה לקטגוריה · <b>קצה השורה</b> קטגוריות</p>
   <button type="button" class="tv-btn" id="updateBtn" data-nav>עדכון מהטלפון</button>
 </header>
 <main id="main" class="tv-main"></main>
+<button type="button" class="tv-fab" id="jumpBtn" data-nav hidden>☰ קטגוריות</button>
+<div class="tv-overlay" id="overlay" hidden></div>
 <div class="tv-toast" id="toast" role="status" hidden></div>
 <script src="tvlink.js"></script>
 <script src="tv.js"></script>

@@ -441,6 +441,9 @@ function normalizeState(raw) {
     tvCode: typeof raw.tvCode === 'string' ? raw.tvCode : '',
     tvLastHash: typeof raw.tvLastHash === 'string' ? raw.tvLastHash : '',
     tvLastSent: Number.isFinite(raw.tvLastSent) ? raw.tvLastSent : 0,
+    // Category order: when it last changed, and where the TV puts the favorites row.
+    orderAt: Number.isFinite(raw.orderAt) ? raw.orderAt : 0,
+    tvFavAfter: typeof raw.tvFavAfter === 'string' ? raw.tvFavAfter : null,
     swipeHintShown: raw.swipeHintShown === true,
     platforms, statuses, shows,
   };
@@ -1859,6 +1862,8 @@ function tvPayload() {
     v: 1,
     sentAt: Date.now(),
     lang: state.lang,
+    orderAt: state.orderAt || 0,
+    favAfter: state.tvFavAfter,
     statuses: state.statuses.map((st) => ({ id: st.id, he: st.he, en: st.en, color: st.color })),
     shows: state.shows.map((s) => {
       const target = watchTarget(s);
@@ -1912,13 +1917,33 @@ function scheduleTvSync(delay = 4000) {
    only if it's newer than the last edit of that series on the phone. */
 async function pullTvChanges(codes) {
   const changes = [];
+  let order = null; // the newest category order sent from any TV
   for (const code of codes) {
     try {
       for (const m of await TvLink.receiveBack(code)) {
         const list = m.payload && Array.isArray(m.payload.changes) ? m.payload.changes : [];
         changes.push(...list);
+        const o = m.payload && m.payload.order;
+        if (o && Array.isArray(o.ids) && Number.isFinite(o.at) && (!order || o.at > order.at)) order = o;
       }
     } catch (err) { /* that TV's channel is unreachable now: next time */ }
+  }
+  let reordered = false;
+  if (order && order.at > (state.orderAt || 0)) {
+    const ids = order.ids.filter((id) => id !== 'fav' && state.statuses.some((st) => st.id === id));
+    const rest = state.statuses.filter((st) => !ids.includes(st.id));
+    // Categories the TV didn't show (empty ones) keep their place after the one before them.
+    const next = ids.map((id) => state.statuses.find((st) => st.id === id));
+    for (const st of rest) {
+      const prev = state.statuses[state.statuses.indexOf(st) - 1];
+      const at = prev ? next.indexOf(prev) : -1;
+      next.splice(at + 1, 0, st);
+    }
+    const fi = order.ids.indexOf('fav');
+    state.tvFavAfter = fi < 0 ? null : (fi === 0 ? '' : order.ids[fi - 1]);
+    state.statuses = next;
+    state.orderAt = order.at;
+    reordered = true;
   }
   changes.sort((a, b) => (a.at || 0) - (b.at || 0));
   const applied = [];
@@ -1929,6 +1954,11 @@ async function pullTvChanges(codes) {
     show.status = c.status;
     show.updatedAt = Math.max(c.at, Date.now());
     applied.push(show);
+  }
+  if (reordered && !applied.length) {
+    save();
+    renderList();
+    toast(state.lang === 'en' ? 'The TV changed the category order' : 'סדר הקטגוריות עודכן מהטלוויזיה', 5000);
   }
   if (applied.length) {
     save();
@@ -2105,6 +2135,7 @@ function openSettings() {
       const j = i + +e.target.closest('[data-move]').dataset.move;
       if (j < 0 || j >= state.statuses.length) return;
       [state.statuses[i], state.statuses[j]] = [state.statuses[j], state.statuses[i]];
+      state.orderAt = Date.now();
       save(); renderCats(); renderList();
       return;
     }

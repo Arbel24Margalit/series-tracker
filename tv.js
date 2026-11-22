@@ -35,6 +35,8 @@ function load() {
     // Category changes made here that the phone hasn't confirmed yet: { showId: { status, at } }
     pending: t.pending && typeof t.pending === 'object' ? t.pending : {},
     pendingSentAt: Number.isFinite(t.pendingSentAt) ? t.pendingSentAt : 0,
+    // Row order set here that the phone hasn't confirmed yet: { ids: [...], at }
+    pendingOrder: t.pendingOrder && Array.isArray(t.pendingOrder.ids) ? t.pendingOrder : null,
   };
 }
 function save() {
@@ -59,18 +61,29 @@ function shows() {
     return p ? { ...s, status: p.status, updated: p.at } : s;
   });
 }
+// Row order: the phone's category order (favorites after favAfter, or second),
+// with this TV's unconfirmed reorder on top. Ids: status id, or 'fav'.
+function rowOrder() {
+  const ids = tv.data.statuses.map((st) => st.id);
+  const fa = tv.data.favAfter;
+  const fi = fa === '' ? 0 : (typeof fa === 'string' && ids.includes(fa) ? ids.indexOf(fa) + 1 : 1);
+  ids.splice(Math.min(fi, ids.length), 0, 'fav');
+  if (!tv.pendingOrder) return ids;
+  const mine = tv.pendingOrder.ids.filter((id) => ids.includes(id));
+  return [...mine, ...ids.filter((id) => !mine.includes(id))];
+}
 function rows() {
   const all = shows();
   const byNew = (a, b) => (b.updated || 0) - (a.updated || 0);
-  const list = tv.data.statuses
-    .map((st) => ({ id: 's:' + st.id, label: statusName(st), color: st.color, shows: all.filter((s) => s.status === st.id).sort(byNew) }))
-    .filter((r) => r.shows.length);
-  const fav = all.filter((s) => s.fav).sort(byNew);
-  if (fav.length) list.splice(1, 0, { id: 'fav', label: 'מועדפים ★', color: '#ffc53d', shows: fav });
-  return list;
+  return rowOrder().map((id) => {
+    if (id === 'fav') return { id: 'fav', key: 'fav', label: 'מועדפים ★', color: '#ffc53d', shows: all.filter((s) => s.fav).sort(byNew) };
+    const st = tv.data.statuses.find((x) => x.id === id);
+    return { id: 's:' + id, key: id, label: statusName(st), color: st.color, shows: all.filter((s) => s.status === id).sort(byNew) };
+  }).filter((r) => r.shows.length);
 }
 // When a new list arrives, drop the changes the phone already has.
 function prunePending() {
+  if (tv.pendingOrder && (tv.data.orderAt || 0) >= tv.pendingOrder.at) tv.pendingOrder = null;
   for (const [id, p] of Object.entries(tv.pending)) {
     const s = tv.data.shows.find((x) => x.id === id);
     if (!s || (s.updated || 0) >= p.at || !tv.data.statuses.some((st) => st.id === p.status)) delete tv.pending[id];
@@ -140,7 +153,46 @@ function openJumpMenu() {
   const items = currentRows.map((r, ri) => `
     <button type="button" class="tv-opt" data-nav data-jump="${ri}" style="--c:${esc(r.color)}">
       <span class="dot"></span>${esc(r.label)}<span class="cur">${r.shows.length}</span></button>`).join('');
-  openOverlay('jump', returnTo, `<h2>קפיצה לקטגוריה</h2><div class="tv-opts">${items}</div>`);
+  openOverlay('jump', returnTo, `<h2>קפיצה לקטגוריה</h2><div class="tv-opts">${items}</div>
+    <div class="tv-opts tv-extra">
+      <button type="button" class="tv-opt" data-nav data-reorder>⇅ סידור הקטגוריות</button>
+      <button type="button" class="tv-opt" data-nav data-showcode>⚙ עדכון מהטלפון והקוד של הטלוויזיה</button>
+    </div>`);
+}
+// Reorder: OK picks a category up, up/down moves it, OK puts it down. Back saves.
+let reorder = null; // { ids, label: {id: text}, color: {}, holding: id|null, start: [...] }
+function openReorderMenu(returnTo) {
+  const ids = currentRows.map((r) => r.key);
+  reorder = { ids, start: ids.slice(), holding: null, info: Object.fromEntries(currentRows.map((r) => [r.key, r])) };
+  openOverlay('reorder', returnTo, '');
+  drawReorder();
+}
+function drawReorder(focusId) {
+  const sheet = $('#overlay .tv-sheet');
+  sheet.innerHTML = `
+    <h2>סידור הקטגוריות</h2>
+    <p class="tv-sub">${reorder.holding ? 'חצים למעלה/למטה מזיזים · OK משחרר' : 'OK על קטגוריה כדי להזיז אותה · "חזור" שומר'}</p>
+    <div class="tv-opts">${reorder.ids.map((id) => {
+      const r = reorder.info[id];
+      return `<button type="button" class="tv-opt${reorder.holding === id ? ' holding' : ''}" data-nav data-ord="${esc(id)}" style="--c:${esc(r.color)}">
+        <span class="dot"></span>${esc(r.label)}<span class="cur">${reorder.holding === id ? '⇅' : r.shows.length}</span></button>`;
+    }).join('')}</div>
+    <button type="button" class="tv-opt watch" data-nav data-ord-done>שמירה</button>`;
+  const f = sheet.querySelector(`[data-ord="${CSS.escape(focusId || reorder.holding || reorder.ids[0])}"]`);
+  if (f) { f.focus(); f.scrollIntoView({ block: 'nearest' }); }
+}
+function finishReorder() {
+  const r = reorder;
+  reorder = null;
+  closeOverlay(false);
+  if (!r || r.ids.join() === r.start.join()) { focusFirst(); return; }
+  tv.pendingOrder = { ids: r.ids, at: Date.now() };
+  save();
+  render();
+  window.scrollTo(0, 0);
+  focusFirst();
+  toast('הסדר נשמר. נשלח לטלפון…');
+  sendPending();
 }
 function openOverlay(kind, returnTo, html, showId = '') {
   const box = $('#overlay');
@@ -180,10 +232,10 @@ let sendingBack = false;
 async function sendPending({ quiet = false } = {}) {
   if (sendingBack) return;
   const changes = Object.entries(tv.pending).map(([id, p]) => ({ id, status: p.status, at: p.at }));
-  if (!changes.length) return;
+  if (!changes.length && !tv.pendingOrder) return;
   sendingBack = true;
   try {
-    await TvLink.sendBack(tv.code, { v: 1, changes });
+    await TvLink.sendBack(tv.code, { v: 1, changes, order: tv.pendingOrder || undefined });
     tv.pendingSentAt = Date.now(); save();
     if (!quiet) toast('נשלח. הטלפון יעדכן את זה כשהאפליקציה בו תיפתח.');
   } catch (err) {
@@ -231,6 +283,13 @@ async function check({ quiet = false } = {}) {
   } finally {
     checking = false;
   }
+}
+// The code screen: shows this TV's code and looks for a list right away.
+function openPair() {
+  screen = 'pair';
+  render();
+  startPolling();
+  check({ quiet: true });
 }
 function startPolling() {
   clearInterval(pollTimer);
@@ -299,6 +358,14 @@ const navItems = () => {
 function move(dir) {
   const cur = document.activeElement;
   // Inside a menu: a simple list, up/down.
+  if (overlay && overlay.kind === 'reorder' && reorder && reorder.holding && (dir === 'up' || dir === 'down')) {
+    const i = reorder.ids.indexOf(reorder.holding), j = i + (dir === 'down' ? 1 : -1);
+    if (j >= 0 && j < reorder.ids.length) {
+      [reorder.ids[i], reorder.ids[j]] = [reorder.ids[j], reorder.ids[i]];
+      drawReorder();
+    }
+    return;
+  }
   if (overlay) {
     const items = navItems();
     const i = items.indexOf(cur);
@@ -321,7 +388,7 @@ function move(dir) {
     const ri = r + (dir === 'down' ? 1 : -1);
     const cards = rowCards(ri);
     if (!cards.length) {
-      if (dir === 'up') { $('#jumpBtn').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      if (dir === 'up') { $('#updateBtn').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
       return;
     }
     // Same spot on screen in the next row.
@@ -380,7 +447,11 @@ document.addEventListener('keydown', (e) => {
   if (press && isOk(e)) { e.preventDefault(); return; }
   const dir = KEYS[e.key];
   if (dir) { e.preventDefault(); if (!press) move(dir); return; }
-  if (overlay && isBack(e)) { e.preventDefault(); closeOverlay(); return; }
+  if (overlay && isBack(e)) {
+    e.preventDefault();
+    if (overlay.kind === 'reorder') finishReorder(); else closeOverlay();
+    return;
+  }
   if (!overlay && (e.key === 'ContextMenu' || e.keyCode === 82)) { // the remote's menu key, if it has one
     const c = document.activeElement;
     if (c && c.classList.contains('tv-card')) { e.preventDefault(); openStatusMenu(c); }
@@ -412,6 +483,11 @@ document.addEventListener('keyup', (e) => {
 /* ---------- Clicks (mouse/touch, and OK inside menus) ---------- */
 document.addEventListener('click', (e) => {
   if (overlay) {
+    const ord = e.target.closest('[data-ord]');
+    if (ord && reorder) { reorder.holding = reorder.holding ? null : ord.dataset.ord; drawReorder(ord.dataset.ord); return; }
+    if (e.target.closest('[data-ord-done]')) { finishReorder(); return; }
+    if (e.target.closest('[data-reorder]')) { const back = overlay.returnTo; closeOverlay(false); openReorderMenu(back); return; }
+    if (e.target.closest('[data-showcode]')) { closeOverlay(false); openPair(); return; }
     const set = e.target.closest('[data-set]');
     if (set) { setStatus(overlay.showId, set.dataset.set); return; }
     if (e.target.closest('[data-watch]')) { const c = overlay.returnTo; closeOverlay(false); if (c) watch(c); return; }
@@ -422,7 +498,7 @@ document.addEventListener('click', (e) => {
       if (card) { card.parentElement.scrollLeft = 0; focusCard(card, true); }
       return;
     }
-    if (e.target === $('#overlay')) closeOverlay();
+    if (e.target === $('#overlay')) { if (overlay.kind === 'reorder') finishReorder(); else closeOverlay(); }
     return;
   }
   const card = e.target.closest('.tv-card');
@@ -430,9 +506,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#jumpBtn')) { openJumpMenu(); return; }
   if (e.target.closest('[data-check]')) { check(); return; }
   if (e.target.closest('[data-back]')) { screen = 'grid'; render(); focusFirst(); return; }
-  if (e.target.closest('#updateBtn')) {
-    check().then((r) => { if (r === 'none') { screen = 'pair'; render(); startPolling(); } });
-  }
+  if (e.target.closest('#updateBtn')) openPair();
 });
 // Touch/mouse: long press on a card also opens the menu.
 document.addEventListener('contextmenu', (e) => {
@@ -449,7 +523,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && sc
 setInterval(() => {
   if (document.hidden) return;
   if (screen === 'grid') check({ quiet: true });
-  if (Object.keys(tv.pending).length && Date.now() - tv.pendingSentAt > RESEND_MS) sendPending({ quiet: true });
+  if ((Object.keys(tv.pending).length || tv.pendingOrder) && Date.now() - tv.pendingSentAt > RESEND_MS) sendPending({ quiet: true });
 }, 20000);
 
 save();
@@ -458,5 +532,5 @@ if (screen === 'pair') startPolling();
 else {
   focusFirst();
   check({ quiet: true });
-  if (Object.keys(tv.pending).length && Date.now() - tv.pendingSentAt > RESEND_MS) sendPending({ quiet: true });
+  if ((Object.keys(tv.pending).length || tv.pendingOrder) && Date.now() - tv.pendingSentAt > RESEND_MS) sendPending({ quiet: true });
 }

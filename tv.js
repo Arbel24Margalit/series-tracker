@@ -189,7 +189,7 @@ function finishReorder() {
   tv.pendingOrder = { ids: r.ids, at: Date.now() };
   save();
   render();
-  window.scrollTo(0, 0);
+  glideTo(window, 0, false);
   focusFirst();
   toast('הסדר נשמר. נשלח לטלפון…');
   sendPending();
@@ -305,18 +305,52 @@ function focusCard(card, smooth = false) {
   card.focus({ preventScroll: true });
   revealCard(card, smooth);
 }
+/* Smooth scrolling that stays soft when you press fast: instead of restarting
+   the browser's smooth scroll on every press (which jerks), each scroller
+   glides toward a target, and a new press just moves the target. */
+const glide = new Map(); // scroller (window or a row) → { axis, target }
+const scrollPos = (el, axis) => (el === window ? window.scrollY : el.scrollLeft);
+const setScroll = (el, axis, v) => { if (el === window) window.scrollTo(0, v); else el.scrollLeft = v; };
+function scrollRange(el) {
+  if (el === window) return [0, Math.max(0, document.documentElement.scrollHeight - window.innerHeight)];
+  const max = Math.max(0, el.scrollWidth - el.clientWidth);
+  return getComputedStyle(el).direction === 'rtl' ? [-max, 0] : [0, max];
+}
+const targetOf = (el) => (glide.has(el) ? glide.get(el).target : scrollPos(el));
+function glideTo(el, target, smooth) {
+  const [lo, hi] = scrollRange(el);
+  target = Math.min(hi, Math.max(lo, target));
+  if (!smooth) { glide.delete(el); setScroll(el, null, target); return; }
+  const idle = glide.size === 0;
+  glide.set(el, { target });
+  if (idle) requestAnimationFrame(glideStep);
+}
+let lastFrame = 0;
+function glideStep(now) {
+  const dt = lastFrame ? Math.min(50, now - lastFrame) : 16;
+  lastFrame = now;
+  const k = 1 - Math.pow(0.78, dt / 16); // ~200ms to settle, same feel at any frame rate
+  for (const [el, g] of glide) {
+    const cur = scrollPos(el);
+    const diff = g.target - cur;
+    if (Math.abs(diff) < 0.6) { setScroll(el, null, g.target); glide.delete(el); continue; }
+    setScroll(el, null, cur + diff * k);
+  }
+  if (glide.size) requestAnimationFrame(glideStep); else lastFrame = 0;
+}
 function revealCard(card, smooth) {
-  const behavior = smooth ? 'smooth' : 'auto';
   const track = card.parentElement;
-  // Horizontal: keep the card inside its row.
+  // Horizontal: keep the card inside its row (measured where the row is heading, not where it is now).
   const t = track.getBoundingClientRect(), c = card.getBoundingClientRect();
+  const shift = targetOf(track) - scrollPos(track);
+  const left = c.left - shift, right = c.right - shift;
   const pad = t.width * 0.06;
-  if (c.left < t.left + pad) track.scrollBy({ left: c.left - t.left - pad, behavior });
-  else if (c.right > t.right - pad) track.scrollBy({ left: c.right - t.right + pad, behavior });
+  if (left < t.left + pad) glideTo(track, targetOf(track) + (left - t.left - pad), smooth);
+  else if (right > t.right - pad) glideTo(track, targetOf(track) + (right - t.right + pad), smooth);
   // Vertical: put the row near the top, under the header.
   const row = card.closest('.tv-row');
-  const top = row.getBoundingClientRect().top + window.scrollY - $('.tv-top').offsetHeight - 8;
-  window.scrollTo({ top: Math.max(0, top), behavior });
+  const rowTop = row.getBoundingClientRect().top + window.scrollY;
+  glideTo(window, rowTop - $('.tv-top').offsetHeight - 8, smooth);
 }
 function focusShow(id, rowId) {
   const cards = [...document.querySelectorAll('.tv-card')];
@@ -347,7 +381,7 @@ function redrawKeepingFocus() {
   const scroll = window.scrollY;
   render();
   if (id) focusShow(id, rowId);
-  else { window.scrollTo(0, scroll); if (!document.activeElement || document.activeElement === document.body) focusFirst(); }
+  else { glideTo(window, scroll, false); if (!document.activeElement || document.activeElement === document.body) focusFirst(); }
 }
 
 /* ---------- Remote control (arrows + OK) ---------- */
@@ -388,7 +422,7 @@ function move(dir) {
     const ri = r + (dir === 'down' ? 1 : -1);
     const cards = rowCards(ri);
     if (!cards.length) {
-      if (dir === 'up') { $('#updateBtn').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      if (dir === 'up') { $('#updateBtn').focus(); glideTo(window, 0, true); }
       return;
     }
     // Same spot on screen in the next row.
@@ -495,7 +529,7 @@ document.addEventListener('click', (e) => {
     if (jump) {
       closeOverlay(false);
       const card = document.querySelector(`.tv-card[data-r="${jump.dataset.jump}"][data-i="0"]`);
-      if (card) { card.parentElement.scrollLeft = 0; focusCard(card, true); }
+      if (card) { glideTo(card.parentElement, 0, false); focusCard(card, true); }
       return;
     }
     if (e.target === $('#overlay')) { if (overlay.kind === 'reorder') finishReorder(); else closeOverlay(); }

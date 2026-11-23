@@ -107,8 +107,6 @@ const STRINGS = {
     imdbFound: 'הקישור ל-IMDb נשמר', imdbNotFound: 'ל-TVmaze אין קישור ל-IMDb עבור הסדרה הזו. אפשר לנסות "חיפוש בגוגל" או להדביק קישור.',
     platforms: 'איפה רואים', platformsHint: 'האפשרויות שמופיעות בכל סדרה. האפשרות "לא ידוע" תמיד קיימת.',
     addPlatform: 'הוספת פלטפורמה', platformName: 'שם הפלטפורמה',
-    pfTemplate: 'תבנית קישור (לא חובה)', pfTemplateHint: 'כתובת עם {name} ו-{year}. סדרות בפלטפורמה הזו בלי קישור שמור יקבלו קישור לפיה.', badTemplate: 'התבנית צריכה להתחיל ב-https://',
-    templateLinkHint: 'אין קישור שמור, ולכן ▶ ייפתח לפי תבנית הקישור של {0}. קישור שיודבק כאן יחליף אותה.', templateMissing: 'חסר {0}, ולכן תבנית הקישור של {1} לא בשימוש.', missingName: 'שם באנגלית', missingYear: 'שנה', missingBoth: 'שם באנגלית ושנה',
     deletePlatformConfirm: 'למחוק את "{0}"? {1} סדרות יעברו ל"לא ידוע".',
     categoryPage: 'מופיעה בדף', pageToday: 'היום', pageNext: 'הבא בתור', pageNone: 'רק ב"הכול"',
     discardTitle: 'לבטל את ההוספה?', discardBody: 'מה שהוקלד לא יישמר.', discard: 'ביטול ההוספה', keepEditing: 'המשך עריכה',
@@ -186,8 +184,6 @@ const STRINGS = {
     imdbFound: 'IMDb link saved', imdbNotFound: 'TVmaze has no IMDb link for this series. Try “Search Google” or paste a link.',
     platforms: 'Where I watch', platformsHint: 'The options shown on every series. “Unknown” is always there.',
     addPlatform: 'Add platform', platformName: 'Platform name',
-    pfTemplate: 'Link template (optional)', pfTemplateHint: 'An address with {name} and {year}. Series on this platform with no saved link get a link built from it.', badTemplate: 'The template must start with https://',
-    templateLinkHint: 'No saved link, so ▶ opens a link built from the {0} template. A link you paste here replaces it.', templateMissing: 'Missing {0}, so the {1} link template is not used.', missingName: 'English name', missingYear: 'year', missingBoth: 'English name and year',
     deletePlatformConfirm: 'Delete “{0}”? {1} series will move to “Unknown”.',
     categoryPage: 'Shows on page', pageToday: 'Today', pageNext: 'Up next', pageNone: 'Only in “All”',
     done: 'Done', cinemaAlwaysDark: 'The Cinema designs are always dark.',
@@ -302,7 +298,6 @@ function parseImdb(v) {
 const imdbUrl = (id) => `https://www.imdb.com/title/${id}/`;
 // The IMDb app doesn't open search links well, so the fallback is a Google search.
 const googleImdbUrl = (q) => `https://www.google.com/search?q=${encodeURIComponent(`${q} imdb`)}`;
-const isTemplate = (u) => typeof u === 'string' && /^https:\/\/[^\s<>"']+$/i.test(u.trim());
 const isWatchUrl = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u.trim());
 
 function el(html) {
@@ -363,7 +358,6 @@ function defaultState() {
     lastBackup: null,
     tvCode: '',
     platforms: DEFAULT_PLATFORMS.slice(),
-    pfTemplates: {},
     statuses: DEFAULT_STATUSES.map((s) => ({ ...s, page: DEFAULT_PAGES[s.id] || '' })),
     shows: seedShows(),
   };
@@ -388,8 +382,22 @@ function normalizeState(raw) {
   const platforms = hadPlatforms
     ? [...new Set(raw.platforms.filter((p) => typeof p === 'string').map((p) => p.trim().slice(0, 40)).filter(Boolean))]
     : DEFAULT_PLATFORMS.slice();
+  // One-time repair after the removed "link template" feature: a platform whose
+  // name became a link goes back to its original name, and missing original
+  // platforms come back.
+  const pfRenamed = {};
+  if (hadPlatforms && raw.pfFixV1 !== true) {
+    const looksLikeLink = (p) => /:\/\/|^www\.|\{name\}|\{year\}|^https?:/i.test(p);
+    for (let i = platforms.length - 1; i >= 0; i--) {
+      if (!looksLikeLink(platforms[i])) continue;
+      const back = DEFAULT_PLATFORMS.find((d) => !platforms.includes(d));
+      if (back) { pfRenamed[platforms[i]] = back; platforms[i] = back; } else platforms.splice(i, 1);
+    }
+    DEFAULT_PLATFORMS.forEach((d) => { if (!platforms.includes(d)) platforms.push(d); });
+  }
   const canonPlatform = (v) => {
-    const t = typeof v === 'string' ? v.trim() : '';
+    let t = typeof v === 'string' ? v.trim() : '';
+    if (pfRenamed[t]) t = pfRenamed[t];
     if (!t) return '';
     const exact = platforms.find((p) => p.toLowerCase() === t.toLowerCase());
     if (exact) return exact;
@@ -451,10 +459,8 @@ function normalizeState(raw) {
     orderAt: Number.isFinite(raw.orderAt) ? raw.orderAt : 0,
     tvFavAfter: typeof raw.tvFavAfter === 'string' ? raw.tvFavAfter : null,
     swipeHintShown: raw.swipeHintShown === true,
+    pfFixV1: true,
     platforms, statuses, shows,
-    // Link templates per platform name; only for platforms that still exist.
-    pfTemplates: Object.fromEntries(Object.entries(raw.pfTemplates && typeof raw.pfTemplates === 'object' ? raw.pfTemplates : {})
-      .filter(([k, v]) => platforms.includes(k) && isTemplate(v)).map(([k, v]) => [k, v.trim()])),
   };
 }
 
@@ -761,34 +767,8 @@ const PLATFORM_SEARCH = {
   apple: (q) => `https://tv.apple.com/search?term=${encodeURIComponent(q)}`,
 };
 // The link ▶ opens: a pasted link wins; otherwise a search on the series' platform.
-// English name as a link part: lower case, words joined by "-", other signs dropped.
-function nameSlug(name) {
-  return String(name || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    .replace(/['’`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-}
-function englishName(show) {
-  if (show.altTitle && !hasHebrew(show.altTitle) && show.altTitle.trim()) return show.altTitle.trim();
-  if (!hasHebrew(show.title) && show.title.trim()) return show.title.trim();
-  return '';
-}
-// The platform's link template filled in for this series. Built on every use, never stored.
-// Returns { url } or { missing: [...] } or null when the platform has no template.
-function templateLink(show) {
-  const tpl = state.pfTemplates && state.pfTemplates[show.platform];
-  if (!show.platform || !isTemplate(tpl)) return null;
-  const slug = tpl.includes('{name}') ? nameSlug(englishName(show)) : 'x';
-  const year = tpl.includes('{year}') ? String((show.tvmaze && show.tvmaze.year) || '').trim() : 'x';
-  const missing = [];
-  if (!slug) missing.push('name');
-  if (!/^\d{4}$/.test(year)) missing.push('year');
-  if (missing.length) return { missing };
-  const url = tpl.trim().split('{name}').join(slug).split('{year}').join(year);
-  return isWatchUrl(url) ? { url } : null;
-}
 function watchTarget(show) {
   if (isWatchUrl(show.watchUrl)) return { url: show.watchUrl.trim(), auto: false };
-  const t = templateLink(show);
-  if (t && t.url) return { url: t.url, auto: false, tpl: true };
   const key = String(show.platform || '').toLowerCase().split(/[\s+(–-]/)[0];
   const q = searchQueryFor(show).trim();
   if (PLATFORM_SEARCH[key] && q) return { url: PLATFORM_SEARCH[key](q), auto: true };
@@ -1637,14 +1617,7 @@ ${isNew ? imageBlock : ''}
     }
     // Explain the automatic search under the link field.
     const hint = $('[data-watch-hint]', body);
-    if (hint && hint.className === 'hint') {
-      const tl = isWatchUrl(show.watchUrl) ? null : templateLink(show);
-      if (tl && tl.missing) {
-        const what = tl.missing.length === 2 ? T('missingBoth') : T(tl.missing[0] === 'name' ? 'missingName' : 'missingYear');
-        hint.textContent = T('templateMissing', what, show.platform);
-      } else if (target && target.tpl) hint.textContent = T('templateLinkHint', show.platform);
-      else hint.textContent = target && target.auto ? T('autoLinkHint', show.platform) : T('watchLinkHint');
-    }
+    if (hint && hint.className === 'hint') hint.textContent = target && target.auto ? T('autoLinkHint', show.platform) : T('watchLinkHint');
     const q = searchQueryFor(show).trim();
     if (show.imdb) parts.push(linkBtn(imdbUrl(show.imdb), esc(T('imdb')), 'btn imdb-btn'));
     else if (q) {
@@ -2102,7 +2075,6 @@ function openSettings() {
       <section class="section">
         <h3>${esc(T('platforms'))}</h3>
         <span class="hint">${esc(T('platformsHint'))}</span>
-        <span class="hint">${esc(T('pfTemplateHint'))}</span>
         <div class="section" data-pfs></div>
         <button type="button" class="btn" data-add-pf>${icon('plus')}${esc(T('addPlatform'))}</button>
       </section>
@@ -2131,7 +2103,6 @@ function openSettings() {
         <input class="input" dir="auto" data-pf-name value="${esc(p)}" aria-label="${esc(T('platformName'))}" maxlength="40">
         <span class="hint">${state.shows.filter((s) => s.platform === p).length}</span>
         <button type="button" class="icon-btn" data-del-pf aria-label="${esc(T('delete'))}">${icon('trash')}</button>
-        <input class="input ltr pf-tpl" type="url" inputmode="url" data-pf-tpl value="${esc(state.pfTemplates[p] || '')}" placeholder="https://example.com/{name}-{year}" aria-label="${esc(T('pfTemplate'))}" title="${esc(T('pfTemplateHint'))}" autocomplete="off" spellcheck="false">
       </div>`).join('');
   }
 
@@ -2214,7 +2185,6 @@ function openSettings() {
       if (using.length && !(await confirmBox(T('deletePlatformConfirm', name, using.length), T('delete'), { danger: true }))) return;
       using.forEach((s) => { s.platform = ''; });
       state.platforms = state.platforms.filter((p) => p !== name);
-      delete state.pfTemplates[name];
       if (state.pf === name) state.pf = '';
       save(); renderPfs(); renderList();
       return;
@@ -2238,18 +2208,8 @@ function openSettings() {
       const name = e.target.value.trim().slice(0, 40);
       if (!name || (name !== oldName && state.platforms.includes(name))) { e.target.value = oldName; return; }
       state.platforms[i] = name;
-      if (name !== oldName && state.pfTemplates[oldName]) { state.pfTemplates[name] = state.pfTemplates[oldName]; delete state.pfTemplates[oldName]; }
       state.shows.forEach((s) => { if (s.platform === oldName) s.platform = name; });
       if (state.pf === oldName) state.pf = name;
-      save(); renderList();
-      return;
-    }
-    if (pfRow && e.target.matches('[data-pf-tpl]')) {
-      const name = state.platforms[+pfRow.dataset.pfRow];
-      const v = e.target.value.trim();
-      if (!v) delete state.pfTemplates[name];
-      else if (isTemplate(v)) state.pfTemplates[name] = v;
-      else { e.target.value = state.pfTemplates[name] || ''; toast(T('badTemplate')); return; }
       save(); renderList();
       return;
     }

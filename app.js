@@ -1881,13 +1881,12 @@ function tvPayload() {
     favAfter: state.tvFavAfter,
     statuses: state.statuses.map((st) => ({ id: st.id, he: st.he, en: st.en, color: st.color })),
     shows: state.shows.map((s) => {
-      const target = watchTarget(s);
       return {
         id: s.id, title: s.title, alt: s.altTitle, status: s.status, fav: s.favorite,
         season: s.season, platform: s.platform, updated: s.updatedAt,
         // Uploaded photos are too big to send; links to posters are fine.
         img: /^https:\/\//i.test(s.image) ? s.image : '',
-        url: target ? target.url : '', auto: target ? target.auto : false,
+        url: isWatchUrl(s.watchUrl) ? s.watchUrl.trim() : '', auto: false,
       };
     }),
   };

@@ -163,6 +163,10 @@ public class MainActivity extends Activity {
 
     /** true = we handled it outside the WebView. */
     private boolean handle(Uri uri) {
+        if ("seriesapp".equals(uri.getScheme())) {
+            openApp(uri.getQueryParameter("app"));
+            return true;
+        }
         String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase();
         if (host.equals(SITE_HOST)) return false;
         openOutside(uri, host);
@@ -189,18 +193,8 @@ public class MainActivity extends Activity {
             if (pkg.equals("com.netflix.ninja")) i.putExtra("source", "30");
             if (tryStart(i)) return;
             // 2. The service's app, at its home screen.
-            PackageManager pm = getPackageManager();
-            Intent home = pm.getLeanbackLaunchIntentForPackage(pkg);
-            if (home == null) home = pm.getLaunchIntentForPackage(pkg);
-            if (home == null && pkg.equals("il.co.yes.yesplus")) home = findYesApp();
-            if (home != null && tryStart(home)) {
-                Toast.makeText(this, "פתחתי את האפליקציה. חפש בה את הסדרה.", Toast.LENGTH_LONG).show();
-                return;
-            }
-            if (pkg.equals("il.co.yes.yesplus")) {
-                Toast.makeText(this, "לא מצאתי את אפליקציית yes בסטרימר הזה.", Toast.LENGTH_LONG).show();
-                return;
-            }
+            openApp(keyFor(pkg));
+            return;
         }
         // 3. Any other site: the TV's own browser (e.g. TV Bro).
         if (tryStart(new Intent(Intent.ACTION_VIEW, uri))) return;
@@ -210,18 +204,71 @@ public class MainActivity extends Activity {
         startActivity(w);
     }
 
-    /** The yes app on a yes streamer may have another name than the store one. */
-    private Intent findYesApp() {
+    private static String keyFor(String pkg) {
+        switch (pkg) {
+            case "com.netflix.ninja": return "netflix";
+            case "com.google.android.youtube.tv": return "youtube";
+            case "il.co.yes.yesplus": return "yes";
+            case "com.apple.atve.androidtv.appletv": return "apple";
+            case "com.disney.disneyplus": return "disney";
+            case "com.amazon.amazonvideo.livingroom": return "prime";
+            default: return "max";
+        }
+    }
+
+    /** Known package names, then words to look for in an app's package or name. */
+    private static String[][] appInfo(String key) {
+        if (key == null) key = "";
+        switch (key) {
+            case "netflix": return new String[][]{{"com.netflix.ninja", "com.netflix.mediaclient"}, {"netflix", "נטפליקס"}, {"Netflix"}};
+            case "yes": return new String[][]{{"il.co.yes.yesplus"}, {"il.co.yes", "yes", "יס"}, {"yes"}};
+            case "youtube": return new String[][]{{"com.google.android.youtube.tv", "com.google.android.youtube"}, {"youtube", "יוטיוב"}, {"YouTube"}};
+            case "apple": return new String[][]{{"com.apple.atve.androidtv.appletv"}, {"apple tv", "appletv"}, {"Apple TV"}};
+            case "disney": return new String[][]{{"com.disney.disneyplus"}, {"disney"}, {"Disney+"}};
+            case "prime": return new String[][]{{"com.amazon.amazonvideo.livingroom"}, {"prime video", "amazonvideo"}, {"Prime Video"}};
+            case "max": return new String[][]{{"com.wbd.stream", "com.hbo.hbonow"}, {"hbo", "max"}, {"Max"}};
+            default: return null;
+        }
+    }
+
+    /** Opens the streaming app for this platform at its home screen. */
+    private void openApp(String key) {
+        String[][] info = appInfo(key);
+        if (info == null) {
+            Toast.makeText(this, "אין קישור לסדרה הזו.", Toast.LENGTH_LONG).show();
+            return;
+        }
         PackageManager pm = getPackageManager();
+        for (String p : info[0]) {
+            Intent i = pm.getLeanbackLaunchIntentForPackage(p);
+            if (i == null) i = pm.getLaunchIntentForPackage(p);
+            if (i != null && tryStart(i)) return;
+        }
+        Intent found = findApp(pm, Intent.CATEGORY_LEANBACK_LAUNCHER, info[1]);
+        if (found == null) found = findApp(pm, Intent.CATEGORY_LAUNCHER, info[1]);
+        if (found != null && tryStart(found)) return;
+        Toast.makeText(this, "לא מצאתי את אפליקציית " + info[2][0] + " בסטרימר הזה.", Toast.LENGTH_LONG).show();
+    }
+
+    /** An installed app whose package or name matches one of the words. */
+    private Intent findApp(PackageManager pm, String category, String[] words) {
         Intent q = new Intent(Intent.ACTION_MAIN);
-        q.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        q.addCategory(category);
         for (ResolveInfo r : pm.queryIntentActivities(q, 0)) {
             String p = r.activityInfo.packageName;
             if (p.equals(getPackageName())) continue;
-            String label = String.valueOf(r.loadLabel(pm)).toLowerCase();
-            if (p.startsWith("il.co.yes") || label.startsWith("yes")) {
-                Intent i = pm.getLeanbackLaunchIntentForPackage(p);
-                if (i != null) return i;
+            String pl = p.toLowerCase();
+            String label = String.valueOf(r.loadLabel(pm)).toLowerCase().trim();
+            for (String w : words) {
+                boolean hit = w.equals("yes") || w.equals("יס") || w.equals("max")
+                        ? label.startsWith(w) || pl.contains("." + w)
+                        : label.contains(w) || pl.contains(w.replace(" ", ""));
+                if (hit) {
+                    Intent i = new Intent(Intent.ACTION_MAIN);
+                    i.addCategory(category);
+                    i.setClassName(p, r.activityInfo.name);
+                    return i;
+                }
             }
         }
         return null;

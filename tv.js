@@ -16,14 +16,29 @@ const RESEND_MS = 6 * 60 * 60 * 1000; // the relay forgets after 12 hours
 const $ = (sel, root = document) => root.querySelector(sel);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const isLink = (u) => typeof u === 'string' && /^https?:\/\/[^\s<>"']+$/i.test(u);
-// A series marked as yes with no pasted link: the TV app opens the yes app for it.
-const isYes = (s) => /^\s*(yes|יס)/i.test(String(s.platform || ''));
-// A series marked as YouTube with no pasted link: the TV app opens the YouTube app (search there).
-const isYouTube = (s) => /^\s*(youtube|יוטיוב)/i.test(String(s.platform || ''));
-const linkFor = (s) => (isLink(s.url) ? s.url
-  : isYes(s) ? 'https://www.yes.co.il/'
-  : isYouTube(s) ? 'https://www.youtube.com/'
-  : '');
+// Where OK takes you:
+// 1. The platform has an app on the TV (Netflix, yes, YouTube...): open that app.
+//    A pasted link from that same service goes straight to the series inside the app.
+// 2. Anything else (FlixHQ, "other", ...): only a link you pasted yourself.
+// 3. Nothing to open: "אין קישור".
+const APPS = [
+  { id: 'netflix', re: /netflix|נטפליקס/i, hosts: /(^|\.)netflix\.com$/i },
+  { id: 'yes', re: /^\s*(yes|יס)/i, hosts: /(^|\.)yes\.co\.il$|yesplus/i },
+  { id: 'youtube', re: /youtube|יוטיוב/i, hosts: /(^|\.)youtube\.com$|^youtu\.be$/i },
+  { id: 'apple', re: /apple|אפל/i, hosts: /^tv\.apple\.com$/i },
+  { id: 'disney', re: /disney|דיסני/i, hosts: /(^|\.)disneyplus\.com$/i },
+  { id: 'prime', re: /prime|אמזון|amazon/i, hosts: /(^|\.)primevideo\.com$/i },
+  { id: 'max', re: /^\s*(hbo|max)/i, hosts: /(^|\.)(hbo)?max\.com$/i },
+];
+// "(מחשב)" in the name = watched on the computer, so no app on the TV.
+const appOf = (s) => { const p = String(s.platform || ''); return /מחשב/.test(p) ? null : APPS.find((a) => a.re.test(p)) || null; };
+const ownLink = (s) => (isLink(s.url) && !s.auto ? s.url : '');
+const hostOf = (u) => { try { return new URL(u).hostname; } catch (e) { return ''; } };
+const linkFor = (s) => {
+  const app = appOf(s), own = ownLink(s);
+  if (app) return own && app.hosts.test(hostOf(own)) ? own : 'seriesapp://open?app=' + app.id;
+  return own;
+};
 
 let tv = load();
 let screen = tv.data ? 'grid' : 'pair';
